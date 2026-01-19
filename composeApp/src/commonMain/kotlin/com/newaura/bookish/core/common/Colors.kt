@@ -1,4 +1,4 @@
-package com.newaura.bookish.common
+package com.newaura.bookish.core.common
 
 import androidx.compose.ui.graphics.Color
 

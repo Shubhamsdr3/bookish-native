@@ -15,8 +15,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.newaura.bookish.features.home.HomeScreen
 import com.newaura.bookish.widgets.GradientBox
-import com.newaura.bookish.common.StartSliderGradientBg
-import com.newaura.bookish.common.EndSliderGradientBg
+import com.newaura.bookish.core.common.EndSliderGradientBg
+import com.newaura.bookish.core.common.StartSliderGradientBg
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 

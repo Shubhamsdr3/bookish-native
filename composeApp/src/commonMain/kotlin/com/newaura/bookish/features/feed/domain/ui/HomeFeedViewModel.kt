@@ -1,5 +1,6 @@
 package com.newaura.bookish.features.feed.domain.ui
 
+import androidx.lifecycle.ViewModel
 import com.newaura.bookish.features.feed.domain.GetHomeFeedUseCase
 import com.newaura.bookish.model.FeedData
 import kotlinx.coroutines.CoroutineScope
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 class HomeFeedViewModel(
     private val getHomeFeedUseCase: GetHomeFeedUseCase,
     coroutineScope: CoroutineScope?  = null
-) {
+): ViewModel() {
     private val viewModelScope = coroutineScope ?: CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val _screenState = MutableStateFlow(HomeFeedScreenState())

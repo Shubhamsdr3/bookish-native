@@ -11,12 +11,11 @@ import com.newaura.bookish.features.feed.domain.VerifyOtpUseCase
 import com.newaura.bookish.features.feed.domain.ui.HomeFeedViewModel
 import com.newaura.bookish.features.feed.domain.ui.LoginViewModel
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
-import kotlinx.serialization.json.Json
-import org.koin.core.module.Module
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
 
@@ -39,10 +38,7 @@ val commonModule = module {
     }
 
     single<BookishApiService> {
-        KtorBookishApiService(
-            httpClient = get(),
-            baseUrl = "https://api.bookish.com/v1" // Your API base URL
-        )
+        KtorBookishApiService()
     }
 
     // Repositories

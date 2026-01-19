@@ -27,45 +27,55 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.koin.compose.viewmodel.koinViewModel
+import cafe.adriel.voyager.core.screen.Screen
 import com.newaura.bookish.features.feed.domain.ui.HomeFeedScreenState
 import com.newaura.bookish.features.feed.domain.ui.HomeFeedUiState
 import com.newaura.bookish.features.feed.domain.ui.HomeFeedViewModel
 import com.newaura.bookish.model.FeedData
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeFeedScreen(
-    viewModel: HomeFeedViewModel,
-    onFeedClick: (FeedData) -> Unit,
-    onProfileClick: () -> Unit,
-    onCreatePostClick: () -> Unit
-) {
-    val screenState by viewModel.screenState. collectAsState()
+class HomeFeedScreen(
+//    private val onFeedClick: (FeedData) -> Unit,
+//    private val onProfileClick: () -> Unit,
+//    private val onCreatePostClick: () -> Unit
+) : Screen {
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    override fun Content() {
+        val viewModel: HomeFeedViewModel = koinViewModel<HomeFeedViewModel>()
+        val screenState by viewModel.screenState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Bookish") },
-                actions = {
-                    IconButton(onClick = onProfileClick) {
-                        // Profile icon
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Bookish") },
+                    actions = {
+                        IconButton(onClick = {
+
+                        }) {
+                            // Profile icon
+                        }
                     }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = {
+
+                }) {
+                    // Add icon
                 }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onCreatePostClick) {
-                // Add icon
             }
+        ) { paddingValues ->
+            HomeFeedContent(
+                screenState = screenState,
+                onFeedClick = {
+
+                },
+                onRetry = viewModel::loadFeed,
+                onRefresh = viewModel::refresh,
+                modifier = Modifier.padding(paddingValues)
+            )
         }
-    ) { paddingValues ->
-        HomeFeedContent(
-            screenState = screenState,
-            onFeedClick = onFeedClick,
-            onRetry = viewModel::loadFeed,
-            onRefresh = viewModel::refresh,
-            modifier = Modifier.padding(paddingValues)
-        )
     }
 }
 
@@ -90,7 +100,7 @@ private fun HomeFeedContent(
 
         is HomeFeedUiState.Success -> {
             val pullRefreshState = rememberPullToRefreshState()
-            
+
             PullToRefreshBox(
                 isRefreshing = screenState.isRefreshing,
                 onRefresh = onRefresh,
@@ -104,7 +114,7 @@ private fun HomeFeedContent(
                 ) {
                     items(
                         items = uiState.feeds,
-                        key = { "${it.user?. phoneNumber}_${it.post?.caption?. take(20)}" }
+                        key = { "${it.user?.phoneNumber}_${it.post?.caption?.take(20)}" }
                     ) { feed ->
                         FeedCard(
                             feedData = feed,
@@ -115,7 +125,7 @@ private fun HomeFeedContent(
             }
         }
 
-        is HomeFeedUiState. Error -> {
+        is HomeFeedUiState.Error -> {
             Column(
                 modifier = modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -125,7 +135,7 @@ private fun HomeFeedContent(
                     text = uiState.message,
                     color = MaterialTheme.colorScheme.error
                 )
-                Spacer(modifier = Modifier. height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onRetry) {
                     Text("Retry")
                 }

@@ -5,24 +5,45 @@ import com.newaura.bookish.model.FeedResponse
 import com.newaura.bookish.model.User
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.DEFAULT
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
-class KtorBookishApiService(
-    private val httpClient: HttpClient,
-    private val baseUrl: String
-) : BookishApiService {
+class KtorBookishApiService() : BookishApiService {
+
+    private val httpClient = HttpClient {
+        install(ContentNegotiation) {
+            json(Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            })
+        }
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.ALL
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
+        }
+    }
+
+    private val baseUrl = "https://20241221t151330-dot-bookish-5aae7.df.r.appspot.com"
 
     override suspend fun getHomeFeed(page: Int, limit:  Int): FeedResponse {
-        return httpClient.get("$baseUrl/feed") {
+        return httpClient.get("$baseUrl/api/bookish/home/feed") {
             parameter("page", page)
-            parameter("limit", limit)
+            parameter("offset", limit)
         }.body()
     }
 

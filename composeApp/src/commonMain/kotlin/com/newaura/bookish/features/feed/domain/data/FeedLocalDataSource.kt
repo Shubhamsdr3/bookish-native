@@ -2,12 +2,19 @@ package com.newaura.bookish.features.feed.domain.data
 
 import com.newaura.bookish.model.FeedData
 
-class FeedLocalDataSource {
-    fun getCachedFeeds(): List<FeedData> {
-        return listOf()
+interface FeedLocalDataSource {
+    suspend fun getCachedFeeds(): List<FeedData>
+
+    suspend fun cacheFeeds(feeds: List<FeedData>);
+}
+
+
+class FeedLocalDataSourceImpl: FeedLocalDataSource {
+    override suspend fun getCachedFeeds(): List<FeedData> {
+        return  emptyList()
     }
 
-    fun cacheFeeds(feeds: List<FeedData>) {
-        TODO("Not yet implemented")
+    override suspend fun cacheFeeds(feeds: List<FeedData>) {
+        // do nothing.
     }
 }

@@ -30,14 +30,14 @@ fun BookishNavHost(
         }
 
         is Screen.Home -> {
-            HomeFeedScreen(
-                viewModel = homeFeedViewModel,
-                onFeedClick = { feed -> 
-                    // Navigate to feed detail
-                },
-                onProfileClick = { currentScreen = Screen.Profile },
-                onCreatePostClick = { currentScreen = Screen.CreatePost }
-            )
+//            HomeFeedScreen(
+//                viewModel = homeFeedViewModel,
+//                onFeedClick = { feed ->
+//                    // Navigate to feed detail
+//                },
+//                onProfileClick = { currentScreen = Screen.Profile },
+//                onCreatePostClick = { currentScreen = Screen.CreatePost }
+//            )
         }
 
         else -> {
