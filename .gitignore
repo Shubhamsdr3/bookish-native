@@ -1,6 +1,6 @@
 *.iml
-.kotlin
-.gradle
+.kotlin/
+.gradle/
 **/build/
 xcuserdata
 !src/**/build/
@@ -17,3 +17,13 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+# Firebase / Google Services
+google-services.json
+**/google-services.json
+GoogleService-Info.plist
+**/GoogleService-Info.plist
+
+# API Keys / Secrets
+*.keystore
+*.jks
+secrets.properties

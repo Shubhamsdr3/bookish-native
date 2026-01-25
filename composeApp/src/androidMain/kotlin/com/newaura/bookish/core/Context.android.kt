@@ -1,3 +1,6 @@
 package com.newaura.bookish.core
 
-actual class Context
+import android.app.Application
+
+actual typealias Context = Application
+

@@ -8,7 +8,7 @@ class BookishApp: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        initKoin {
+        initKoin(this) {
             androidContext(this@BookishApp)
             androidLogger()
             modules()

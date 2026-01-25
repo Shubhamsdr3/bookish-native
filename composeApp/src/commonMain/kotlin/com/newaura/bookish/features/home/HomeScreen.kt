@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.newaura.bookish.features.feed.domain.ui.screens.HomeFeedScreen
+import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen
 import com.newaura.bookish.features.mybooks.MyBookScreen
 import com.newaura.bookish.features.profile.ProfileScreen
 
@@ -32,9 +32,7 @@ class HomeScreen : Screen {
     @Composable
     override fun Content() {
         val selectedItem = remember { mutableStateOf(0) }
-
-        val navigator = LocalNavigator.currentOrThrow
-
+        
         Column(
             modifier = Modifier
                 .safeContentPadding()

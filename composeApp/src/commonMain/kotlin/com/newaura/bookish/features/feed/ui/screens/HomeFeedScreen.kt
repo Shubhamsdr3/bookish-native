@@ -1,0 +1,222 @@
+package com.newaura.bookish.features.feed.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.PlusOne
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.koin.compose.viewmodel.koinViewModel
+import cafe.adriel.voyager.core.screen.Screen
+import com.newaura.bookish.core.common.TextViewBody
+import com.newaura.bookish.core.common.TextViewLight
+import com.newaura.bookish.core.common.TextViewMedium
+import com.newaura.bookish.features.feed.ui.HomeFeedScreenState
+import com.newaura.bookish.features.feed.ui.HomeFeedUiState
+import com.newaura.bookish.features.feed.ui.HomeFeedViewModel
+import com.newaura.bookish.model.FeedData
+import kotlin.hashCode
+
+class HomeFeedScreen(
+//    private val onFeedClick: (FeedData) -> Unit,
+//    private val onProfileClick: () -> Unit,
+//    private val onCreatePostClick: () -> Unit
+) : Screen {
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    override fun Content() {
+        val viewModel: HomeFeedViewModel = koinViewModel<HomeFeedViewModel>()
+        val screenState by viewModel.screenState.collectAsState()
+        Scaffold(
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+            topBar = {
+                TopAppBar(
+                    title = {
+                        TextViewMedium("Bookish")
+                    },
+                    actions = {
+                        IconButton(onClick = {
+
+                        }) {
+                            // Profile icon
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier.fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                TextViewBody("What are you reading today ?")
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .drawBehind {
+                            val strokeWith = 1.dp.toPx()
+                            drawRoundRect(
+                                color = Color.Gray,
+                                style = Stroke(
+                                    width = strokeWith,
+                                    pathEffect = PathEffect.dashPathEffect(
+                                        intervals = floatArrayOf(8f, 8f),
+                                        phase = 0f
+                                    ),
+                                ),
+                                cornerRadius = CornerRadius(12.dp.toPx())
+                            )
+                        }.
+                        background(
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp)
+                            .clickable {
+
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            Icons.Outlined.Add,
+                            contentDescription = "Add post",
+                            modifier = Modifier.size(24.dp),
+                            tint = Color.Gray
+                        )
+                        TextViewBody(
+                            text = "Share a quote or thought",
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+                Spacer(Modifier.height(24.dp))
+                HomeFeedContent(
+                    screenState = screenState,
+                    onFeedClick = {
+
+                    },
+                    onRetry = viewModel::loadFeed,
+                    onRefresh = viewModel::refresh,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeFeedContent(
+    screenState: HomeFeedScreenState,
+    onFeedClick: (FeedData) -> Unit,
+    onRetry: () -> Unit,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (val uiState = screenState.uiState) {
+        is HomeFeedUiState.Loading -> {
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        is HomeFeedUiState.Success -> {
+            val pullRefreshState = rememberPullToRefreshState()
+
+            PullToRefreshBox(
+                isRefreshing = screenState.isRefreshing,
+                onRefresh = onRefresh,
+                state = pullRefreshState,
+                modifier = modifier
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(
+                        items = uiState.feeds,
+                        key = { feed -> feed.post?.id ?: feed.fallbackId }
+                    ) { feed ->
+                        FeedCard(
+                            feedData = feed,
+                            onClick = { onFeedClick(feed) }
+                        )
+                    }
+                }
+            }
+        }
+
+        is HomeFeedUiState.Error -> {
+            Column(
+                modifier = modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = uiState.message,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onRetry) {
+                    Text("Retry")
+                }
+            }
+        }
+    }
+}

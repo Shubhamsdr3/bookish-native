@@ -13,12 +13,18 @@ import bookish.composeapp.generated.resources.app_logo
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.newaura.bookish.features.home.HomeScreen
-import com.newaura.bookish.widgets.GradientBox
 import com.newaura.bookish.core.common.EndSliderGradientBg
 import com.newaura.bookish.core.common.StartSliderGradientBg
+import com.newaura.bookish.core.domain.AppDataStoreRepository
+import com.newaura.bookish.core.domain.DataStoreKeys
+import com.newaura.bookish.features.auth.LoginScreen
+import com.newaura.bookish.features.feed.BookishApiService
+import com.newaura.bookish.features.feed.KtorBookishApiService
+import com.newaura.bookish.features.home.HomeScreen
+import com.newaura.bookish.widgets.GradientBox
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
 
 class SplashScreen : Screen {
@@ -27,9 +33,18 @@ class SplashScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
+        val appDataStoreRepository = koinInject<AppDataStoreRepository>()
+        val apiService = koinInject<BookishApiService>()
+
         LaunchedEffect(Unit) {
             delay(1000) // 1 sec
-            navigator.push(HomeScreen())
+            val authToken = appDataStoreRepository.readValue(DataStoreKeys.AUTH_TOKEN)
+            if (authToken.isNullOrEmpty()) {
+                navigator.push(LoginScreen())
+            } else {
+                apiService.setAuthToken(authToken)
+                navigator.push(HomeScreen())
+            }
         }
 
         GradientBox(
