@@ -19,8 +19,7 @@ import com.newaura.bookish.core.domain.AppDataStoreRepository
 import com.newaura.bookish.core.domain.DataStoreKeys
 import com.newaura.bookish.features.auth.LoginScreen
 import com.newaura.bookish.features.feed.BookishApiService
-import com.newaura.bookish.features.feed.KtorBookishApiService
-import com.newaura.bookish.features.home.HomeScreen
+import com.newaura.bookish.features.post.ui.CreatePostScreen
 import com.newaura.bookish.widgets.GradientBox
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
@@ -43,7 +42,7 @@ class SplashScreen : Screen {
                 navigator.push(LoginScreen())
             } else {
                 apiService.setAuthToken(authToken)
-                navigator.push(HomeScreen())
+                navigator.push(CreatePostScreen())
             }
         }
 

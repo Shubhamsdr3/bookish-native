@@ -14,9 +14,9 @@ fun NetworkImage(
     url: String,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    contentScale: ContentScale = ContentScale.Crop,
-
-    ) {
+    placeHolder: @Composable () -> Unit = {},
+    contentScale: ContentScale = ContentScale.Crop
+) {
     SubcomposeAsyncImage(
         model = url,
         contentDescription = contentDescription,
@@ -35,8 +35,8 @@ fun NetworkImage(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-
+                placeHolder()
             }
-        }
+        },
     )
 }

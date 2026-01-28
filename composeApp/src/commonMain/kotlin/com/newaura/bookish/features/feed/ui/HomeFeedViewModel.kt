@@ -1,7 +1,7 @@
 package com.newaura.bookish.features.feed.ui
 
 import androidx.lifecycle.ViewModel
-import com.newaura.bookish.features.feed.GetHomeFeedUseCase
+import com.newaura.bookish.features.feed.domain.GetHomeFeedUseCase
 import com.newaura.bookish.model.FeedData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

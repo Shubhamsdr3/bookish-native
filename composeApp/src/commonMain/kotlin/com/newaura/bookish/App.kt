@@ -14,6 +14,7 @@ import com.newaura.bookish.features.auth.domain.PhoneAuthService
 import com.newaura.bookish.features.feed.di.commonModule
 import com.newaura.bookish.features.feed.di.feedDataModule
 import com.newaura.bookish.features.home.di.homePresentationModule
+import com.newaura.bookish.features.post.di.createPostModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
@@ -46,6 +47,7 @@ fun initKoin(context: Context, config: KoinAppDeclaration? = null) {
             authDataModule,
             authDomainModule,
             authServiceModule,
+            createPostModule
         )
     }
 }

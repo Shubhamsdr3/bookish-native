@@ -3,11 +3,11 @@ package com.newaura.bookish.features.feed.di
 import com.newaura.bookish.features.FeedRepository
 import com.newaura.bookish.features.feed.BookishApiService
 import com.newaura.bookish.features.feed.FeedRepositoryImpl
-import com.newaura.bookish.features.feed.GetHomeFeedUseCase
+import com.newaura.bookish.features.feed.domain.GetHomeFeedUseCase
 import com.newaura.bookish.features.feed.KtorBookishApiService
-import com.newaura.bookish.features.feed.SendOtpUseCase
-import com.newaura.bookish.features.feed.SignInWithGoogleUseCase
-import com.newaura.bookish.features.feed.VerifyOtpUseCase
+import com.newaura.bookish.features.feed.domain.SendOtpUseCase
+import com.newaura.bookish.features.feed.domain.SignInWithGoogleUseCase
+import com.newaura.bookish.features.feed.domain.VerifyOtpUseCase
 import com.newaura.bookish.features.feed.ui.HomeFeedViewModel
 import com.newaura.bookish.features.feed.ui.LoginViewModel
 import io.ktor.client.HttpClient
@@ -15,10 +15,8 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.websocket.FrameType.Companion.get
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
-import org.koin.viewmodel.scope.viewModelScope
 
 
 val commonModule = module {

@@ -40,9 +40,7 @@ import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 
-class LoginScreen(
-//    onLoginSuccess: (String) -> Unit
-) : Screen {
+class LoginScreen() : Screen {
 
     @Composable
     override fun Content() {

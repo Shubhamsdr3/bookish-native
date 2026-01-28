@@ -98,6 +98,7 @@ kotlin {
             implementation(libs.voyager.tabNavigator)
             implementation(libs.voyager.transitions)
             implementation(compose.components.resources)
+            implementation(libs.kt.date.time)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

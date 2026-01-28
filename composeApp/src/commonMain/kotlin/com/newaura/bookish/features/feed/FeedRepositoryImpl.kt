@@ -55,12 +55,12 @@ class FeedRepositoryImpl(
         }
     }
 
-    override suspend fun createPost(caption: String, images: List<String>): Result<FeedData> {
-        return try {
+    override suspend fun createPost(caption: String, images: List<String>): Flow<Result<FeedData>> = flow {
+        try {
             val feed = apiService.createPost(caption, images)
-            Result.success(feed)
+            emit(Result.success(feed))
         } catch (e:  Exception) {
-            Result.failure(e)
+            emit(Result.failure(e))
         }
     }
 

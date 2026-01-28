@@ -1,12 +1,10 @@
 package com.newaura.bookish.features.feed.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,25 +15,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.PlusOne
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
-import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -48,30 +38,29 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.koin.compose.viewmodel.koinViewModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.newaura.bookish.core.common.TextViewBody
-import com.newaura.bookish.core.common.TextViewLight
 import com.newaura.bookish.core.common.TextViewMedium
 import com.newaura.bookish.features.feed.ui.HomeFeedScreenState
 import com.newaura.bookish.features.feed.ui.HomeFeedUiState
 import com.newaura.bookish.features.feed.ui.HomeFeedViewModel
+import com.newaura.bookish.features.post.ui.CreatePostScreen
 import com.newaura.bookish.model.FeedData
-import kotlin.hashCode
+import org.koin.compose.viewmodel.koinViewModel
 
-class HomeFeedScreen(
-//    private val onFeedClick: (FeedData) -> Unit,
-//    private val onProfileClick: () -> Unit,
-//    private val onCreatePostClick: () -> Unit
-) : Screen {
+class HomeFeedScreen() : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val viewModel: HomeFeedViewModel = koinViewModel<HomeFeedViewModel>()
         val screenState by viewModel.screenState.collectAsState()
+
+        val navigator = LocalNavigator.currentOrThrow
+
         Scaffold(
             modifier = Modifier.background(MaterialTheme.colorScheme.surface),
             topBar = {
@@ -99,7 +88,11 @@ class HomeFeedScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .background(color = Color.White)
                         .height(50.dp)
+                        .clickable {
+                            navigator.push(CreatePostScreen())
+                        }
                         .drawBehind {
                             val strokeWith = 1.dp.toPx()
                             drawRoundRect(
@@ -113,8 +106,7 @@ class HomeFeedScreen(
                                 ),
                                 cornerRadius = CornerRadius(12.dp.toPx())
                             )
-                        }.
-                        background(
+                        }.background(
                             color = Color.Transparent,
                             shape = RoundedCornerShape(12.dp)
                         )
@@ -122,10 +114,7 @@ class HomeFeedScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(12.dp)
-                            .clickable {
-
-                            },
+                            .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {

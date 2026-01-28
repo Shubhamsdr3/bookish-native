@@ -5,9 +5,9 @@ import com.newaura.bookish.features.auth.data.AuthRepositoryImpl
 import com.newaura.bookish.features.auth.domain.AuthRepository
 import com.newaura.bookish.features.auth.domain.PhoneAuthService
 import com.newaura.bookish.features.feed.BookishApiService
-import com.newaura.bookish.features.feed.LoginUserUseCase
-import com.newaura.bookish.features.feed.SendOtpUseCase
-import com.newaura.bookish.features.feed.VerifyOtpUseCase
+import com.newaura.bookish.features.feed.domain.LoginUserUseCase
+import com.newaura.bookish.features.feed.domain.SendOtpUseCase
+import com.newaura.bookish.features.feed.domain.VerifyOtpUseCase
 import org.koin.dsl.module
 
 val authDataModule = module {

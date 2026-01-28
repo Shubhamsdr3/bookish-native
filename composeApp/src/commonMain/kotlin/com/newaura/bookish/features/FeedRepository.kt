@@ -7,6 +7,6 @@ interface FeedRepository {
     suspend fun getHomeFeed(): Flow<Result<List<FeedData>>>
     suspend fun getFeedDetail(feedId: String): Result<FeedData?>
     suspend fun likeFeed(feedId: String): Result<Boolean>
-    suspend fun createPost(caption: String, images: List<String>): Result<FeedData>
+    suspend fun createPost(caption: String, images: List<String>): Flow<Result<FeedData>>
     suspend fun searchFeeds(query: String): Flow<Result<List<FeedData>>>
 }

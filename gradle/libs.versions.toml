@@ -24,6 +24,7 @@ firebase-auth = "24.0.1"
 google-service = "4.4.4"
 firebase-gitlive = "2.4.0"
 datastoreCore = "1.2.0"
+kotlin-datetime = "0.7.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -42,6 +43,7 @@ koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin"
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+kt-date-time = {module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlin-datetime" }
 
 # DataStore
 androidx-datastore-datastore = { module = "androidx.datastore:datastore", version.ref = "androidx-datastore" }

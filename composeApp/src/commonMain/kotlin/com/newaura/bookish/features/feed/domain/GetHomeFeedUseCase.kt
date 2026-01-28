@@ -1,4 +1,4 @@
-package com.newaura.bookish.features.feed
+package com.newaura.bookish.features.feed.domain
 
 import com.newaura.bookish.features.FeedRepository
 import com.newaura.bookish.model.FeedData

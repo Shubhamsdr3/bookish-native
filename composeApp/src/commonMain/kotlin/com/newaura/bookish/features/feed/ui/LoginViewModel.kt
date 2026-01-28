@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import com.newaura.bookish.core.ActivityContext
 import com.newaura.bookish.core.domain.AppDataStoreRepository
 import com.newaura.bookish.core.domain.DataStoreKeys
-import com.newaura.bookish.features.feed.LoginUserUseCase
-import com.newaura.bookish.features.feed.SendOtpUseCase
-import com.newaura.bookish.features.feed.SignInWithGoogleUseCase
-import com.newaura.bookish.features.feed.VerifyOtpUseCase
+import com.newaura.bookish.features.feed.domain.LoginUserUseCase
+import com.newaura.bookish.features.feed.domain.SendOtpUseCase
+import com.newaura.bookish.features.feed.domain.SignInWithGoogleUseCase
+import com.newaura.bookish.features.feed.domain.VerifyOtpUseCase
 import com.newaura.bookish.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

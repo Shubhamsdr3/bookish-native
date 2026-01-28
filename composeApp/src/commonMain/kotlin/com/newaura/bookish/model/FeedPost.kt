@@ -1,9 +1,22 @@
 package com.newaura.bookish.model
 
-import kotlinx.serialization.Serializable
+import com.newaura.bookish.core.util.DateTimeUtility
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+
+
+enum class PostType {
+    @SerialName("thought")
+    THOUGHT,
+
+    @SerialName("quote")
+    QUOTE,
+
+    @SerialName("review")
+    REVIEW
+}
 
 @Serializable
 data class FeedResponse(
@@ -37,6 +50,7 @@ data class PostAction(
 data class FeedPost(
     val id: String? = null,
     val caption: String? = null,
+    val postType: PostType = PostType.QUOTE,
     val images: List<String>? = null
 )
 
@@ -49,4 +63,13 @@ data class Reader(
     val createdAt: Long? = null,
     val privacy: Int? = null,
     val phoneNumber: String? = null
-)
+) {
+
+    fun getFormattedCreatedAt(): String {
+        return if (createdAt != null) {
+            DateTimeUtility.getFormattedDateTime(createdAt)
+        } else {
+            ""
+        }
+    }
+}
