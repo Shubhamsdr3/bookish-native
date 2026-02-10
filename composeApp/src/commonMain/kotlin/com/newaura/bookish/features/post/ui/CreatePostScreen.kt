@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -43,10 +44,12 @@ import com.newaura.bookish.model.PostType
 class CreatePostScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
+    @Preview
     @Composable
     override fun Content() {
 
         val searchQuery = remember { mutableStateOf("") }
+        val contentDescription = remember { mutableStateOf("") }
 
         val navigator = LocalNavigator.currentOrThrow
         val options = PostType.entries.toList()
@@ -55,6 +58,7 @@ class CreatePostScreen : Screen {
         Scaffold(
             topBar = {
                 TopAppBar(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                     title = {
                         TextViewMedium("Create Post")
                     },
@@ -99,9 +103,10 @@ class CreatePostScreen : Screen {
                 )
                 Spacer(Modifier.height(24.dp))
                 TextViewBody("Your thoughts")
+                Spacer(Modifier.fillMaxWidth().height(16.dp))
                 OutlinedTextField(
-                    value = searchQuery.value,
-                    onValueChange = { searchQuery.value = it },
+                    value = contentDescription.value,
+                    onValueChange = { contentDescription.value = it },
                     placeholder = {
                         TextViewBody(
                             "What do you think about this book ?",

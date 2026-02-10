@@ -2,19 +2,19 @@
 
 ## ✅ Setup Complete!
 
-Your repository now has **automatic push enabled** whenever you commit changes. Here's what was configured:
+This repository now has **automatic push enabled** whenever I commit changes. Here's what was configured:
 
 ### How It Works
 
 1. **Global Post-Commit Hook** (`~/.git-hooks/post-commit`)
-   - Installed in your global Git hooks directory
+   - Installed in my global Git hooks directory
    - Automatically runs after every commit in ANY repository
    - Checks for an opt-in marker file before pushing
 
 2. **Repository Opt-In Marker** (`.git/hooks/post-commit.autoPush`)
    - This file marks that **only this repository** should auto-push
-   - Other repositories on your machine are NOT affected
-   - Remove this file if you want to disable auto-push for this repo
+   - Other repositories on my machine are NOT affected
+   - Remove this file if I want to disable auto-push for this repo
 
 ### Repository-Specific Setup
 
@@ -26,8 +26,8 @@ Your repository now has **automatic push enabled** whenever you commit changes. 
 
 Simply commit as normal:
 ```bash
-git add your-files
-git commit -m "your commit message"
+git add my-files
+git commit -m "my commit message"
 ```
 
 The hook will automatically:
@@ -68,6 +68,4 @@ If the hook doesn't run:
 ✅ **Forgetting to push commits** (no more lost work!)  
 ✅ **Out-of-sync local and remote branches**  
 ✅ **Losing commits because they weren't pushed**
-
-Happy coding! Your changes are now automatically synced to GitHub. 🚀
 
