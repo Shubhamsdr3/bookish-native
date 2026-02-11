@@ -6,7 +6,9 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.newaura.bookish.core.Context
 import com.newaura.bookish.core.common.AppTheme
 import com.newaura.bookish.core.data.AppDataStoreRepositoryManager
+import com.newaura.bookish.core.data.UserDataStoreImpl
 import com.newaura.bookish.core.domain.AppDataStoreRepository
+import com.newaura.bookish.core.domain.UserDataStore
 import com.newaura.bookish.features.auth.di.authDataModule
 import com.newaura.bookish.features.auth.di.authDomainModule
 import com.newaura.bookish.features.auth.di.createAuthService
@@ -39,9 +41,14 @@ fun initKoin(context: Context, config: KoinAppDeclaration? = null) {
             single<AppDataStoreRepository> { AppDataStoreRepositoryManager(context) }
         }
 
+        val userDataStore = module {
+            single<UserDataStore> { UserDataStoreImpl(get()) }
+        }
+
         modules(
             commonModule,
             dataStoreModule,
+            userDataStore,
             homePresentationModule,
             feedDataModule,
             authDataModule,

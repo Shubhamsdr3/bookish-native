@@ -39,7 +39,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.newaura.bookish.core.common.TextViewBody
 import com.newaura.bookish.core.common.TextViewMedium
 import com.newaura.bookish.core.util.toCamelCase
+import com.newaura.bookish.features.post.CreatePostViewModel
 import com.newaura.bookish.model.PostType
+import org.koin.compose.koinInject
 
 class CreatePostScreen : Screen {
 
@@ -47,7 +49,7 @@ class CreatePostScreen : Screen {
     @Preview
     @Composable
     override fun Content() {
-
+        val viewModel = koinInject<CreatePostViewModel>()
         val searchQuery = remember { mutableStateOf("") }
         val contentDescription = remember { mutableStateOf("") }
 
@@ -141,7 +143,7 @@ class CreatePostScreen : Screen {
                     }
                     Button(
                         onClick = {
-
+                            viewModel.createPost()
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Blue,

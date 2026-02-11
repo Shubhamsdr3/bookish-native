@@ -32,8 +32,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.newaura.bookish.core.common.TextViewBody
+import com.newaura.bookish.core.data.ButtonState
 import com.newaura.bookish.core.getActivityContext
-import com.newaura.bookish.features.feed.ui.ButtonState
 import com.newaura.bookish.features.feed.ui.LoginUiState
 import com.newaura.bookish.features.feed.ui.LoginViewModel
 import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen

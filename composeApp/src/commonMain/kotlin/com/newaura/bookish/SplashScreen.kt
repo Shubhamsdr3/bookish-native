@@ -17,6 +17,7 @@ import com.newaura.bookish.core.common.EndSliderGradientBg
 import com.newaura.bookish.core.common.StartSliderGradientBg
 import com.newaura.bookish.core.domain.AppDataStoreRepository
 import com.newaura.bookish.core.domain.DataStoreKeys
+import com.newaura.bookish.core.domain.UserState
 import com.newaura.bookish.features.auth.LoginScreen
 import com.newaura.bookish.features.feed.BookishApiService
 import com.newaura.bookish.features.post.ui.CreatePostScreen
@@ -37,6 +38,7 @@ class SplashScreen : Screen {
 
         LaunchedEffect(Unit) {
             delay(1000) // 1 sec
+            UserState.init()
             val authToken = appDataStoreRepository.readValue(DataStoreKeys.AUTH_TOKEN)
             if (authToken.isNullOrEmpty()) {
                 navigator.push(LoginScreen())

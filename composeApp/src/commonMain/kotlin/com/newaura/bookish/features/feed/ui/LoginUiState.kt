@@ -1,11 +1,5 @@
 package com.newaura.bookish.features.feed.ui
 
-sealed interface ButtonState {
-    data object Loading: ButtonState
-    data object Disabled: ButtonState
-    data object Enabled: ButtonState
-}
-
 sealed interface LoginUiState {
     data object Idle : LoginUiState
     data object Loading : LoginUiState
