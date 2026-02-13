@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -30,7 +29,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -43,10 +41,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.newaura.bookish.core.common.TextViewBody
+import com.newaura.bookish.core.common.SpannableText
+import com.newaura.bookish.core.common.TextSpan
 import com.newaura.bookish.core.common.TextViewMedium
 import com.newaura.bookish.core.ui.NetworkImage
 import com.newaura.bookish.model.FeedData
@@ -57,6 +56,7 @@ import com.newaura.bookish.model.PostType
 fun FeedCard(
     feedData: FeedData,
     onClick: () -> Unit,
+    onBookNameClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -64,7 +64,7 @@ fun FeedCard(
             .fillMaxWidth()
             .clickable(
                 onClick = onClick,
-                indication = ripple(bounded = true),
+                indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ),
         colors = CardDefaults.cardColors().copy(
@@ -90,16 +90,47 @@ fun FeedCard(
                         )
                     }
                 )
-
                 Spacer(modifier = Modifier.width(12.dp))
-
                 Column {
-                    TextViewMedium(
-                        text = feedData.user?.name ?: "",
-                        fontSize = 14.sp
+                    SpannableText(
+                        TextSpan(
+                            text = feedData.user?.name ?: "Guest user",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Black
+                        ),
+                        TextSpan(
+                            text = getPostTypeLabel(feedData),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.Gray
+                        ),
+                        modifier = Modifier.fillMaxWidth()
                     )
+                    if (feedData.post?.bookName?.isNotBlank() == true) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    onClick = {
+                                        onBookNameClick(feedData.post.bookName)
+                                    },
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                )
+                                .padding(vertical = 4.dp)
+                        ) {
+                            TextViewMedium(
+                                text = feedData.post.bookName,
+                                fontSize = 14.sp,
+                                color = Color(0xFF007A55),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
                     TextViewBody(
-                        text = feedData.post?.getFormattedCreatedAt() ?: "",
+                        text = feedData.getFormattedCreatedAt(),
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
@@ -154,6 +185,14 @@ fun FeedCard(
                 )
             }
         }
+    }
+}
+
+private fun getPostTypeLabel(feedData: FeedData): String {
+    return when (feedData.post?.postType) {
+        PostType.QUOTE -> " shared quote on"
+        PostType.REVIEW -> " shared review on"
+        else -> " shared though on"
     }
 }
 
@@ -220,12 +259,14 @@ fun PostCaption(post: FeedPost?) {
                         .background(Color.Cyan)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = caption,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontStyle = FontStyle.Italic,
-                    color = Color.Gray
+                SpannableText(
+                    TextSpan(
+                        text = caption,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Gray,
+                        fontStyle = FontStyle.Italic
+                    )
                 )
             } else {
                 TextViewBody(caption)

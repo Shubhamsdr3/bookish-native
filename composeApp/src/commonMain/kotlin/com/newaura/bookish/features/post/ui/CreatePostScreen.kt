@@ -1,7 +1,9 @@
 package com.newaura.bookish.features.post.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +25,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +46,8 @@ import com.newaura.bookish.features.post.CreatePostViewModel
 import com.newaura.bookish.model.PostType
 import org.koin.compose.koinInject
 
+import com.newaura.bookish.features.search.ui.SearchBooksScreen
+
 class CreatePostScreen : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +63,8 @@ class CreatePostScreen : Screen {
         var selected by remember { mutableStateOf(0) }
 
         Scaffold(
+            modifier = Modifier.fillMaxWidth(),
+            containerColor = Color.White,
             topBar = {
                 TopAppBar(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
@@ -80,21 +87,34 @@ class CreatePostScreen : Screen {
             ) {
                 TextViewBody("Select book")
                 Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
-                    value = searchQuery.value,
-                    onValueChange = { searchQuery.value = it },
-                    placeholder = {
-                        TextViewBody(
-                            "Search book",
-                            color = Color.LightGray
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            onClick = {
+                                navigator.push(SearchBooksScreen())
+                            },
+                            indication = ripple(bounded = true),
+                            interactionSource = remember { MutableInteractionSource() }
                         )
-                    },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "")
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery.value,
+                        onValueChange = { searchQuery.value = it },
+                        placeholder = {
+                            TextViewBody(
+                                "Search book",
+                                color = Color.LightGray
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = "")
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = false,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 Spacer(Modifier.height(16.dp))
                 PostTypeSelector(
                     options = options,
@@ -147,6 +167,7 @@ class CreatePostScreen : Screen {
                                 postCaption = contentDescription.value,
                                 bookTitle = searchQuery.value,
                                 selectedPostType = options[selected],
+
                             ))
                             viewModel.createPost()
                         },

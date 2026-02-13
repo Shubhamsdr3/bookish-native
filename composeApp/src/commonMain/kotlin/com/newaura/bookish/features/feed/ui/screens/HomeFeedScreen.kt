@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -29,8 +30,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -48,6 +52,7 @@ import com.newaura.bookish.core.common.TextViewMedium
 import com.newaura.bookish.features.feed.ui.HomeFeedScreenState
 import com.newaura.bookish.features.feed.ui.HomeFeedUiState
 import com.newaura.bookish.features.feed.ui.HomeFeedViewModel
+import com.newaura.bookish.features.mybooks.MyBookScreen
 import com.newaura.bookish.features.post.ui.CreatePostScreen
 import com.newaura.bookish.model.FeedData
 import org.koin.compose.viewmodel.koinViewModel
@@ -139,6 +144,7 @@ class HomeFeedScreen() : Screen {
                     },
                     onRetry = viewModel::loadFeed,
                     onRefresh = viewModel::refresh,
+                    onLoadMore = viewModel::loadMore,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -153,8 +159,11 @@ private fun HomeFeedContent(
     onFeedClick: (FeedData) -> Unit,
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
+    onLoadMore: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val navigator = LocalNavigator.currentOrThrow
+
     when (val uiState = screenState.uiState) {
         is HomeFeedUiState.Loading -> {
             Box(
@@ -167,6 +176,27 @@ private fun HomeFeedContent(
 
         is HomeFeedUiState.Success -> {
             val pullRefreshState = rememberPullToRefreshState()
+            val lazyListState = rememberLazyListState()
+
+            val shouldLoadMore by remember {
+                derivedStateOf {
+                    val layoutInfo = lazyListState.layoutInfo
+                    val totalItems = layoutInfo.totalItemsCount
+                    val visibleItems = layoutInfo.visibleItemsInfo.size
+                    val lastVisibleIndex = if (visibleItems > 0) {
+                        layoutInfo.visibleItemsInfo.last().index
+                    } else {
+                        0
+                    }
+                    lastVisibleIndex >= totalItems - 3 && uiState.paginationMetadata.hasNextPage
+                }
+            }
+
+            LaunchedEffect(shouldLoadMore) {
+                if (shouldLoadMore && !screenState.isLoadingMore) {
+                    onLoadMore()
+                }
+            }
 
             PullToRefreshBox(
                 isRefreshing = screenState.isRefreshing,
@@ -176,7 +206,8 @@ private fun HomeFeedContent(
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    state = lazyListState
                 ) {
                     items(
                         items = uiState.feeds,
@@ -184,8 +215,27 @@ private fun HomeFeedContent(
                     ) { feed ->
                         FeedCard(
                             feedData = feed,
-                            onClick = { onFeedClick(feed) }
+                            onClick = { onFeedClick(feed) },
+                            onBookNameClick = { _ ->
+                                // Navigate to book detail.
+                                navigator.push(MyBookScreen())
+                            }
                         )
+                    }
+
+                    if (screenState.isLoadingMore) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -1,10 +1,10 @@
 package com.newaura.bookish.features.feed
 
 import com.newaura.bookish.core.network.ApiResponse
-import com.newaura.bookish.core.network.ApiStatus
 import com.newaura.bookish.features.post.data.CreatePostRequest
 import com.newaura.bookish.model.FeedData
 import com.newaura.bookish.model.FeedResponse
+import com.newaura.bookish.model.FeedApiResponse
 import com.newaura.bookish.model.User
 import com.newaura.bookish.model.UserResponseDto
 import io.ktor.client.HttpClient
@@ -30,8 +30,15 @@ import kotlinx.serialization.json.Json
 import io.ktor.http.content.OutgoingContent
 import io.ktor.client.plugins.observer.ResponseObserver
 import com.newaura.bookish.core.util.AppLogger
+import com.newaura.bookish.model.GoogleBooksResponse
+import io.ktor.client.request.HttpRequest
 
 class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
+
+    companion object {
+
+        const val BASE_URL = "https://20241221t151330-dot-bookish-5aae7.df.r.appspot.com"
+    }
 
     private var authToken: String = initialAuthToken
 
@@ -59,10 +66,9 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
         }
     }
 
-    private fun logCurlCommand(request: io.ktor.client.request.HttpRequest) {
+    private fun logCurlCommand(request: HttpRequest) {
         val curlCommand = StringBuilder("curl -X ${request.method.value}")
 
-        // Add headers
         request.headers.forEach { key, values ->
             values.forEach { value ->
                 curlCommand.append(" -H \"$key: ${if (key == HttpHeaders.Authorization) "Bearer $authToken" else value}\"")
@@ -70,7 +76,6 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
             }
         }
 
-        // Add body if present
         try {
             if (request.content is OutgoingContent.ByteArrayContent) {
                 val content = (request.content as OutgoingContent.ByteArrayContent).bytes()
@@ -93,61 +98,56 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
         AppLogger.d("==========================")
     }
 
-    private val baseUrl = "https://20241221t151330-dot-bookish-5aae7.df.r.appspot.com"
-
-  override suspend fun getHomeFeed(page: Int, limit: Int): ApiResponse<List<FeedData>>? {
-      var response: ApiResponse<List<FeedData>>? = null
-      try {
-          response = httpClient.get("$baseUrl/api/bookish/home/feed") {
-              parameter("page", page)
-              parameter("offset", limit)
-          }.body<ApiResponse<List<FeedData>>>()
-      } catch (ex: Exception) {
-          AppLogger.e("Error fetching home feed", ex)
-      }
-      return response
-  }
+    override suspend fun getHomeFeed(page: Int, limit: Int): FeedApiResponse? {
+        var response: FeedApiResponse? = null
+        try {
+            response = httpClient.get("$BASE_URL/api/bookish/home/feed") {
+                parameter("page", page)
+                parameter("offset", limit)
+            }.body<FeedApiResponse>()
+        } catch (ex: Exception) {
+            AppLogger.e("Error fetching home feed", ex)
+        }
+        return response
+    }
 
     override suspend fun getFeedDetail(feedId: String): FeedData? {
-        return httpClient.get("$baseUrl/feed/$feedId").body()
+        return httpClient.get("$BASE_URL/feed/$feedId").body()
     }
 
     override suspend fun likeFeed(feedId: String): Boolean {
-        val response = httpClient.post("$baseUrl/feed/$feedId/like")
+        val response = httpClient.post("$BASE_URL/feed/$feedId/like")
         return response.status == HttpStatusCode.OK
     }
 
     override suspend fun createPost(createPostRequest: CreatePostRequest): ApiResponse<FeedData>? {
-        var response: ApiResponse<FeedData>?
-        try {
-           response = httpClient.post("$baseUrl/api/bookish/createPost") {
-               contentType(ContentType.Application.Json)
-               setBody(createPostRequest)
-           }.body<ApiResponse<FeedData>>()
-            response.status = ApiStatus.SUCCESS
-       } catch (ex: Exception) {
-           AppLogger.e("Error creating post", ex)
-           response = ApiResponse(status = ApiStatus.ERROR, data = null, message = ex.message ?: "Something went wrong")
-       }
-        return response
+        return try {
+            val httpResponse = httpClient.post("$BASE_URL/api/bookish/createPost") {
+                contentType(ContentType.Application.Json)
+                setBody(createPostRequest)
+            }
+            httpResponse.body<ApiResponse<FeedData>>()
+        } catch (ex: Exception) {
+            throw ex
+        }
     }
 
     override suspend fun searchFeeds(query: String): FeedResponse {
-        return httpClient.get("$baseUrl/feed/search") {
+        return httpClient.get("$BASE_URL/feed/search") {
             parameter("q", query)
         }.body()
     }
 
     override suspend fun getCurrentUser(): ApiResponse<User?> {
-        return httpClient.get("$baseUrl/user/me").body()
+        return httpClient.get("$BASE_URL/user/me").body()
     }
 
     override suspend fun getUserById(userId: String): ApiResponse<User?> {
-        return httpClient.get("$baseUrl/user/$userId").body()
+        return httpClient.get("$BASE_URL/user/$userId").body()
     }
 
     override suspend fun updateProfile(user: User): ApiResponse<User?> {
-        return httpClient.put("$baseUrl/user/me") {
+        return httpClient.put("$BASE_URL/user/me") {
             contentType(ContentType.Application.Json)
             setBody(user)
         }.body()
@@ -155,13 +155,27 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
 
     override suspend fun loginUser(user: User): Result<ApiResponse<UserResponseDto>> {
         return try {
-            val response = httpClient.post("$baseUrl/api/bookish/login") {
+            val response = httpClient.post("$BASE_URL/api/bookish/login") {
                 contentType(ContentType.Application.Json)
                 setBody(user)
             }.body<ApiResponse<UserResponseDto>>()
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    override suspend fun searchBooks(query: String, maxResults: Int): GoogleBooksResponse? {
+        return try {
+            val response = httpClient.get("https://www.googleapis.com/books/v1/volumes") {
+                parameter("q", query)
+                parameter("maxResults", maxResults)
+            }.body<GoogleBooksResponse>()
+            AppLogger.d("Search Books Response: $response")
+            response
+        } catch (ex: Exception) {
+            AppLogger.e("Error searching books", ex)
+            null
         }
     }
 

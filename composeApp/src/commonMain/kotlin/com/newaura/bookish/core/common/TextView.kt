@@ -4,6 +4,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
@@ -18,13 +19,39 @@ fun TextViewSemiBold(text: String, fontSize: TextUnit, color: Color) {
 }
 
 @Composable
-fun TextViewMedium(text: String, fontSize: TextUnit = 16.sp, color: Color = Color.Black) {
-    Text(text, fontSize = fontSize, fontWeight = FontWeight.Medium, color = color)
+fun TextViewMedium(
+    text: String,
+    fontSize: TextUnit = 16.sp,
+    color: Color = Color.Black,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
+) {
+    Text(
+        text = text,
+        fontSize = fontSize,
+        fontWeight = FontWeight.Medium,
+        color = color,
+        maxLines = maxLines,
+        overflow = overflow
+    )
 }
 
 @Composable
-fun TextViewBody(text: String, fontSize: TextUnit = 14.sp, color: Color = Color.Black) {
-    Text(text, fontSize = fontSize, fontWeight = FontWeight.Normal, color = color)
+fun TextViewBody(
+    text: String,
+    fontSize: TextUnit = 14.sp,
+    color: Color = Color.Black,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
+) {
+    Text(
+        text = text,
+        fontSize = fontSize,
+        fontWeight = FontWeight.Normal,
+        color = color,
+        maxLines = maxLines,
+        overflow = overflow
+    )
 }
 
 @Composable

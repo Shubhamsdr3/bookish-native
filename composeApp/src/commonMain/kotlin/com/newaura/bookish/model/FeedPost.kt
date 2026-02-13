@@ -60,9 +60,9 @@ data class PostAction(
 data class FeedPost(
     val id: String? = null,
     val caption: String? = null,
-    val postType: PostType = PostType.QUOTE,
+    val postType: PostType = PostType.THOUGHT,
     val images: List<String>? = null,
-
+    val bookName: String? = null,
 )
 
 @Serializable
