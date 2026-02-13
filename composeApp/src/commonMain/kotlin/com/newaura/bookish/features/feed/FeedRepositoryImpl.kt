@@ -1,7 +1,9 @@
 package com.newaura.bookish.features.feed
 
+import com.newaura.bookish.core.network.ApiStatus
 import com.newaura.bookish.features.FeedRepository
 import com.newaura.bookish.features.feed.data.FeedLocalDataSource
+import com.newaura.bookish.features.post.data.CreatePostRequest
 import com.newaura.bookish.model.FeedData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -55,11 +57,16 @@ class FeedRepositoryImpl(
         }
     }
 
-    override suspend fun createPost(caption: String, images: List<String>): Flow<Result<FeedData>> = flow {
+    override suspend fun createPost(createPostRequest: CreatePostRequest): Flow<Result<FeedData?>> = flow {
         try {
-            val feed = apiService.createPost(caption, images)
-            emit(Result.success(feed))
-        } catch (e:  Exception) {
+            val response = apiService.createPost(createPostRequest)
+            if (response?.isSuccess == true && response.data != null) {
+                emit(Result.success(response.data))
+            } else {
+                emit(Result.failure(Exception(response?.message)))
+            }
+        } catch (e: Exception) {
+            println(e)
             emit(Result.failure(e))
         }
     }

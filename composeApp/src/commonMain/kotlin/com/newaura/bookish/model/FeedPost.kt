@@ -36,8 +36,18 @@ data class FeedData @OptIn(ExperimentalUuidApi::class) constructor(
     val like: PostAction? = null,
     val comment: PostAction? = null,
     val share: PostAction? = null,
+    val createdAt: Long? = null,
+    val updatedAt: Long? = null,
     val fallbackId: String = Uuid.random().toString()
-)
+) {
+    fun getFormattedCreatedAt(): String {
+        return if (createdAt != null) {
+            DateTimeUtility.getFormattedDateTime(createdAt)
+        } else {
+            ""
+        }
+    }
+}
 
 @Serializable
 data class PostAction(
@@ -51,7 +61,8 @@ data class FeedPost(
     val id: String? = null,
     val caption: String? = null,
     val postType: PostType = PostType.QUOTE,
-    val images: List<String>? = null
+    val images: List<String>? = null,
+
 )
 
 @Serializable
@@ -60,16 +71,6 @@ data class Reader(
     val profileIcon: String? = null,
     val name: String? = null,
     val connections: Int? = null,
-    val createdAt: Long? = null,
     val privacy: Int? = null,
     val phoneNumber: String? = null
-) {
-
-    fun getFormattedCreatedAt(): String {
-        return if (createdAt != null) {
-            DateTimeUtility.getFormattedDateTime(createdAt)
-        } else {
-            ""
-        }
-    }
-}
+)

@@ -22,7 +22,4 @@ data class CreatePostScreenState(
     val selectedPostType: PostType = PostType.REVIEW,
     val selectedImages: List<ImageFile> = emptyList(),
     val selectedBook: BookDetail? = null,
-    val thoughts: String = "",
-    val isSubmitting: Boolean = false,
-    val selectedImageCount: Int = 0,
 )

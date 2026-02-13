@@ -1,10 +1,12 @@
-package com.newaura.bookish
+package com.newaura.bookish.core
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,13 +21,15 @@ import com.newaura.bookish.core.domain.AppDataStoreRepository
 import com.newaura.bookish.core.domain.DataStoreKeys
 import com.newaura.bookish.core.domain.UserState
 import com.newaura.bookish.features.auth.LoginScreen
+import com.newaura.bookish.features.feed.AuthState
 import com.newaura.bookish.features.feed.BookishApiService
+import com.newaura.bookish.features.home.HomeScreen
 import com.newaura.bookish.features.post.ui.CreatePostScreen
 import com.newaura.bookish.widgets.GradientBox
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
-
+import org.koin.compose.viewmodel.koinViewModel
 
 class SplashScreen : Screen {
 
@@ -36,15 +40,23 @@ class SplashScreen : Screen {
         val appDataStoreRepository = koinInject<AppDataStoreRepository>()
         val apiService = koinInject<BookishApiService>()
 
-        LaunchedEffect(Unit) {
-            delay(1000) // 1 sec
-            UserState.init()
+        val viewModel: SplashViewModel = koinViewModel<SplashViewModel>()
+        val authState by viewModel.authState.collectAsState()
+
+        LaunchedEffect(authState) {
             val authToken = appDataStoreRepository.readValue(DataStoreKeys.AUTH_TOKEN)
-            if (authToken.isNullOrEmpty()) {
-                navigator.push(LoginScreen())
-            } else {
-                apiService.setAuthToken(authToken)
-                navigator.push(CreatePostScreen())
+            when (authState) {
+                is AuthState.Loading -> {
+                    // TODO
+                }
+                is AuthState.Authenticated -> {
+                    apiService.setAuthToken(authToken ?: "")
+                    navigator.push(HomeScreen())
+                }
+
+                else -> {
+                    navigator.push(LoginScreen())
+                }
             }
         }
 

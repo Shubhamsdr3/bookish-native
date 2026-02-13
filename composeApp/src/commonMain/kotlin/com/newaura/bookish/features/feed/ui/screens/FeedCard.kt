@@ -99,7 +99,7 @@ fun FeedCard(
                         fontSize = 14.sp
                     )
                     TextViewBody(
-                        text = feedData.user?.getFormattedCreatedAt() ?: "",
+                        text = feedData.post?.getFormattedCreatedAt() ?: "",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )

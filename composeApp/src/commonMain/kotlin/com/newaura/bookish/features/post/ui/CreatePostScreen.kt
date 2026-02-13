@@ -143,6 +143,11 @@ class CreatePostScreen : Screen {
                     }
                     Button(
                         onClick = {
+                            viewModel.updateUiState(CreatePostScreenState(
+                                postCaption = contentDescription.value,
+                                bookTitle = searchQuery.value,
+                                selectedPostType = options[selected],
+                            ))
                             viewModel.createPost()
                         },
                         colors = ButtonDefaults.buttonColors(

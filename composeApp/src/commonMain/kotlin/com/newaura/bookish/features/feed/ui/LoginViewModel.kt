@@ -5,6 +5,7 @@ import com.newaura.bookish.core.ActivityContext
 import com.newaura.bookish.core.data.ButtonState
 import com.newaura.bookish.core.domain.AppDataStoreRepository
 import com.newaura.bookish.core.domain.DataStoreKeys
+import com.newaura.bookish.core.domain.UserDataStore
 import com.newaura.bookish.features.feed.domain.LoginUserUseCase
 import com.newaura.bookish.features.feed.domain.SendOtpUseCase
 import com.newaura.bookish.features.feed.domain.SignInWithGoogleUseCase
@@ -25,7 +26,7 @@ class LoginViewModel(
     private val verifyOtpUseCase: VerifyOtpUseCase,
     private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
     private val loginUserUseCase: LoginUserUseCase,
-    private val appDataStoreRepository: AppDataStoreRepository,
+    private val userDataStore: UserDataStore,
     coroutineScope: CoroutineScope? = null
 ) : ViewModel() {
 
@@ -109,7 +110,8 @@ class LoginViewModel(
             loginUserUseCase(user).collect { result ->
                 result.onSuccess { userData ->
                     _screenState.update {
-                        appDataStoreRepository.setValue(DataStoreKeys.AUTH_TOKEN, userData?.token ?: "")
+                        userDataStore.setUserId(userData?.user?.userId ?: "")
+                        userDataStore.setAuthToken(userData?.token ?: "")
                         it.copy(uiState = LoginUiState.Success(userData?.token ?: ""))
                     }
                 }

@@ -29,7 +29,7 @@ class CreatePostViewModel(
     private val _postUiDataState = MutableStateFlow(CreatePostUiState.Idle)
     val postUiDataState: StateFlow<CreatePostUiState> = _postUiDataState.asStateFlow()
 
-   private val _postButtonState = MutableStateFlow<ButtonState>(ButtonState.Disabled)
+    private val _postButtonState = MutableStateFlow<ButtonState>(ButtonState.Disabled)
     val postButtonState: StateFlow<ButtonState> = _postButtonState.asStateFlow()
 
     fun navigateToSearchSuggestion(onResult: (BookDetail?) -> Unit) {
@@ -44,14 +44,15 @@ class CreatePostViewModel(
         }
     }
 
-    fun updateUiState() {
-        _postUiDataState.update {
-            CreatePostUiState.Idle
-        }
+    fun updateUiState(postScreenState: CreatePostScreenState) {
+        _postScreenState.value = postScreenState
     }
 
     fun createPost() {
-        if (_postButtonState.value == ButtonState.Disabled) return
+//        if (_postButtonState.value == ButtonState.Disabled) return
+
+        val userId = userDataStore.currentUserId
+        if(userId.isNullOrEmpty()) return
 
         viewModelScope.launch {
             _postScreenState.update { it.copy(uiState = CreatePostUiState.Loading) }
@@ -61,8 +62,9 @@ class CreatePostViewModel(
                     uploadImageFile(imageFile)
                 }
 
-                val userId = UserState.currentUserId
-                val bookCategories = _postScreenState.value.selectedBook?.volumeInfo?.categories?.map { it } ?: emptyList()
+                val bookCategories =
+                    _postScreenState.value.selectedBook?.volumeInfo?.categories?.map { it }
+                        ?: emptyList()
 
                 val requestBody = CreatePostRequest(
                     userId = userId,
@@ -78,10 +80,7 @@ class CreatePostViewModel(
                     )
                 )
 
-                createPostUseCase.invoke(
-                    caption = requestBody.post.caption,
-                    images = requestBody.post.images
-                ).collect { result ->
+                createPostUseCase.invoke(requestBody).collect { result ->
                     result.onSuccess {
                         _postScreenState.update {
                             it.copy(uiState = CreatePostUiState.Success("Post created successfully"))
@@ -89,15 +88,24 @@ class CreatePostViewModel(
                         clearForm()
                     }
                     result.onFailure { exception ->
-                        _postScreenState.update {
-                            it.copy(uiState = CreatePostUiState.Error(exception.message ?: "Something went wrong"))
-                        }
-                        handleError(exception)
+                        println(exception)
+//                        _postScreenState.update {
+//                            it.copy(
+//                                uiState = CreatePostUiState.Error(
+//                                    exception.message ?: "Something went wrong"
+//                                )
+//                            )
+//                        }
+//                        handleError(exception)
                     }
                 }
             } catch (exception: Exception) {
                 _postScreenState.update {
-                    it.copy(uiState = CreatePostUiState.Error(exception.message ?: "Something went wrong"))
+                    it.copy(
+                        uiState = CreatePostUiState.Error(
+                            exception.message ?: "Something went wrong"
+                        )
+                    )
                 }
                 handleError(exception)
             }
@@ -117,8 +125,10 @@ class CreatePostViewModel(
         val errorMessage = when {
             exception.message?.contains("Unauthorized", ignoreCase = true) == true ->
                 "Session expired. Please login again."
+
             exception.message?.contains("Network", ignoreCase = true) == true ->
                 "Network error. Please check your connection."
+
             else -> exception.message ?: "Unknown error occurred"
         }
 
@@ -130,10 +140,10 @@ class CreatePostViewModel(
     private fun enablePostButton() {
         val currentState = _postScreenState.value
         val isButtonEnabled = currentState != CreatePostUiState.Loading &&
-            currentState.bookTitle.isNotEmpty() &&
-            currentState.postCaption.isNotEmpty()
+                currentState.bookTitle.isNotEmpty() &&
+                currentState.postCaption.isNotEmpty()
 
-        _postButtonState.value = if(isButtonEnabled) ButtonState.Enabled else ButtonState.Disabled
+        _postButtonState.value = if (isButtonEnabled) ButtonState.Enabled else ButtonState.Disabled
     }
 
     private fun clearForm() {

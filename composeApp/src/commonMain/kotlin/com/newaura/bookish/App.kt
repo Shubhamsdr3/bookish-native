@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.navigator.Navigator
 import com.newaura.bookish.core.Context
+import com.newaura.bookish.core.SplashScreen
 import com.newaura.bookish.core.common.AppTheme
 import com.newaura.bookish.core.data.AppDataStoreRepositoryManager
 import com.newaura.bookish.core.data.UserDataStoreImpl
@@ -13,6 +14,7 @@ import com.newaura.bookish.features.auth.di.authDataModule
 import com.newaura.bookish.features.auth.di.authDomainModule
 import com.newaura.bookish.features.auth.di.createAuthService
 import com.newaura.bookish.features.auth.domain.PhoneAuthService
+import com.newaura.bookish.features.feed.UserRepository
 import com.newaura.bookish.features.feed.di.commonModule
 import com.newaura.bookish.features.feed.di.feedDataModule
 import com.newaura.bookish.features.home.di.homePresentationModule
@@ -42,7 +44,10 @@ fun initKoin(context: Context, config: KoinAppDeclaration? = null) {
         }
 
         val userDataStore = module {
-            single<UserDataStore> { UserDataStoreImpl(get()) }
+            single<UserDataStore> { UserDataStoreImpl(
+                get<UserRepository>(),
+                get<AppDataStoreRepository>())
+            }
         }
 
         modules(

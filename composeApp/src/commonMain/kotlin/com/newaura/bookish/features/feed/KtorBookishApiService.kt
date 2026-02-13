@@ -1,6 +1,8 @@
 package com.newaura.bookish.features.feed
 
 import com.newaura.bookish.core.network.ApiResponse
+import com.newaura.bookish.core.network.ApiStatus
+import com.newaura.bookish.features.post.data.CreatePostRequest
 import com.newaura.bookish.model.FeedData
 import com.newaura.bookish.model.FeedResponse
 import com.newaura.bookish.model.User
@@ -25,6 +27,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import io.ktor.http.content.OutgoingContent
+import io.ktor.client.plugins.observer.ResponseObserver
+import com.newaura.bookish.core.util.AppLogger
 
 class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
 
@@ -42,11 +47,50 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
             level = LogLevel.ALL
             sanitizeHeader { header -> header == HttpHeaders.Authorization }
         }
+        install(ResponseObserver) {
+            onResponse { response ->
+                logCurlCommand(response.call.request)
+            }
+        }
         install(DefaultRequest) {
             if (authToken.isNotEmpty()) {
                 header(HttpHeaders.Authorization, "Bearer $authToken")
             }
         }
+    }
+
+    private fun logCurlCommand(request: io.ktor.client.request.HttpRequest) {
+        val curlCommand = StringBuilder("curl -X ${request.method.value}")
+
+        // Add headers
+        request.headers.forEach { key, values ->
+            values.forEach { value ->
+                curlCommand.append(" -H \"$key: ${if (key == HttpHeaders.Authorization) "Bearer $authToken" else value}\"")
+                curlCommand.append(" \\\n")
+            }
+        }
+
+        // Add body if present
+        try {
+            if (request.content is OutgoingContent.ByteArrayContent) {
+                val content = (request.content as OutgoingContent.ByteArrayContent).bytes()
+                val bodyString = content.decodeToString()
+                if (bodyString.isNotBlank()) {
+                    curlCommand.append(" -d '").append(bodyString).append("' \\\n")
+                }
+            } else {
+                AppLogger.d("Request content type: ${request.content::class.simpleName}")
+            }
+        } catch (e: Exception) {
+            AppLogger.e("Error extracting request body", e)
+        }
+
+        // Add URL
+        curlCommand.append(" \"${request.url}\"")
+
+        AppLogger.d("====== CURL COMMAND ======")
+        AppLogger.d(curlCommand.toString())
+        AppLogger.d("==========================")
     }
 
     private val baseUrl = "https://20241221t151330-dot-bookish-5aae7.df.r.appspot.com"
@@ -59,7 +103,7 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
               parameter("offset", limit)
           }.body<ApiResponse<List<FeedData>>>()
       } catch (ex: Exception) {
-          print(ex)
+          AppLogger.e("Error fetching home feed", ex)
       }
       return response
   }
@@ -73,11 +117,19 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
         return response.status == HttpStatusCode.OK
     }
 
-    override suspend fun createPost(caption: String, images: List<String>): FeedData {
-        return httpClient.post("$baseUrl/feed") {
-            contentType(ContentType.Application.Json)
-            setBody(mapOf("caption" to caption, "images" to images))
-        }.body()
+    override suspend fun createPost(createPostRequest: CreatePostRequest): ApiResponse<FeedData>? {
+        var response: ApiResponse<FeedData>?
+        try {
+           response = httpClient.post("$baseUrl/api/bookish/createPost") {
+               contentType(ContentType.Application.Json)
+               setBody(createPostRequest)
+           }.body<ApiResponse<FeedData>>()
+            response.status = ApiStatus.SUCCESS
+       } catch (ex: Exception) {
+           AppLogger.e("Error creating post", ex)
+           response = ApiResponse(status = ApiStatus.ERROR, data = null, message = ex.message ?: "Something went wrong")
+       }
+        return response
     }
 
     override suspend fun searchFeeds(query: String): FeedResponse {
@@ -86,15 +138,15 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
         }.body()
     }
 
-    override suspend fun getCurrentUser(): User? {
+    override suspend fun getCurrentUser(): ApiResponse<User?> {
         return httpClient.get("$baseUrl/user/me").body()
     }
 
-    override suspend fun getUserById(userId: String): User? {
+    override suspend fun getUserById(userId: String): ApiResponse<User?> {
         return httpClient.get("$baseUrl/user/$userId").body()
     }
 
-    override suspend fun updateProfile(user: User): User {
+    override suspend fun updateProfile(user: User): ApiResponse<User?> {
         return httpClient.put("$baseUrl/user/me") {
             contentType(ContentType.Application.Json)
             setBody(user)

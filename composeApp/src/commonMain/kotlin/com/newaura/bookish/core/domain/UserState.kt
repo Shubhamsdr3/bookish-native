@@ -12,7 +12,7 @@ object UserState : KoinComponent {
     private val userDataStore: UserDataStore by inject()
 
     suspend fun init() {
-        currentUserId = userDataStore.currentUserId.first()
+//        currentUserId = userDataStore.currentUserId.first()
     }
 
     fun clearUserState() {

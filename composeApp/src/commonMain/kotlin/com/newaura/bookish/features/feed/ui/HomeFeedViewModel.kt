@@ -28,7 +28,6 @@ class HomeFeedViewModel(
     fun loadFeed() {
         viewModelScope.launch {
             _screenState.update { it.copy(uiState = HomeFeedUiState.Loading) }
-
             getHomeFeedUseCase().collect { result ->
                 result.fold(
                     onSuccess = { feeds ->
