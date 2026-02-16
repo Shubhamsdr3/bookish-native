@@ -37,20 +37,15 @@ class SplashScreen : Screen {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
 
-        val appDataStoreRepository = koinInject<AppDataStoreRepository>()
-        val apiService = koinInject<BookishApiService>()
-
         val viewModel: SplashViewModel = koinViewModel<SplashViewModel>()
         val authState by viewModel.authState.collectAsState()
 
         LaunchedEffect(authState) {
-            val authToken = appDataStoreRepository.readValue(DataStoreKeys.AUTH_TOKEN)
             when (authState) {
                 is AuthState.Loading -> {
                     // TODO
                 }
                 is AuthState.Authenticated -> {
-                    apiService.setAuthToken(authToken ?: "")
                     navigator.push(HomeScreen())
                 }
 

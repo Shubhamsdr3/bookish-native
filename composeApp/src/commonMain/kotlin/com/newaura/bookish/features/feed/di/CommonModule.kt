@@ -70,7 +70,10 @@ val commonModule = module {
         HomeFeedViewModel(getHomeFeedUseCase = get())
     }
 
-    factory { SplashViewModel(userDataStore = get<UserDataStore>()) }
+    factory { SplashViewModel(
+        userDataStore = get<UserDataStore>(),
+        get<BookishApiService>())
+    }
 
     factory {
         LoginViewModel(

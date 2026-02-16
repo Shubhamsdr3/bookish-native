@@ -30,7 +30,7 @@ class FeedRepositoryImpl(
 
             val response = apiService.getHomeFeed(page = page, limit = limit)
 
-            if (response != null && response.isSuccess) {
+            if (response != null && response.isSuccess == true) {
                 if (page == 1 && response.data.isNotEmpty()) {
                     localDataSource.cacheFeeds(response.data)
                 }

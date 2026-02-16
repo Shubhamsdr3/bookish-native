@@ -4,19 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.newaura.bookish.core.data.ButtonState
 import com.newaura.bookish.core.domain.UserDataStore
-import com.newaura.bookish.core.domain.UserState
 import com.newaura.bookish.features.post.data.CreatePostRequest
 import com.newaura.bookish.features.post.data.ImageFile
 import com.newaura.bookish.features.post.data.PostData
 import com.newaura.bookish.features.post.domain.CreatePostUseCase
 import com.newaura.bookish.features.post.ui.CreatePostScreenState
 import com.newaura.bookish.features.post.ui.CreatePostUiState
+import com.newaura.bookish.features.search.ui.SearchBooksViewModel
 import com.newaura.bookish.model.BookDetail
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent
 
 class CreatePostViewModel(
     private val createPostUseCase: CreatePostUseCase,
@@ -26,21 +28,32 @@ class CreatePostViewModel(
     private val _postScreenState = MutableStateFlow(CreatePostScreenState())
     val postScreenState: StateFlow<CreatePostScreenState> = _postScreenState.asStateFlow()
 
-    private val _postUiDataState = MutableStateFlow(CreatePostUiState.Idle)
+    private val _postUiDataState = MutableStateFlow<CreatePostUiState>(CreatePostUiState.Idle)
     val postUiDataState: StateFlow<CreatePostUiState> = _postUiDataState.asStateFlow()
 
     private val _postButtonState = MutableStateFlow<ButtonState>(ButtonState.Disabled)
     val postButtonState: StateFlow<ButtonState> = _postButtonState.asStateFlow()
 
-    fun navigateToSearchSuggestion(onResult: (BookDetail?) -> Unit) {
-        _postScreenState.update {
-            it.copy(uiState = CreatePostUiState.NavigateToSearch)
-        }
+    private var bookSelectionJob: Job? = null
+
+    init {
+        listenToSelectedBook()
     }
 
-    fun navigateToHome() {
-        _postScreenState.update {
-            it.copy(uiState = CreatePostUiState.NavigateToHome)
+    private fun listenToSelectedBook() {
+        bookSelectionJob = viewModelScope.launch {
+            try {
+                val searchViewModel = KoinJavaComponent.get<SearchBooksViewModel>(SearchBooksViewModel::class.java)
+                searchViewModel.screenState.collect { searchState ->
+                    if (searchState.selectedBook != null) {
+                        _postScreenState.update { currentState ->
+                            currentState.copy(selectedBook = searchState.selectedBook)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // SearchBooksViewModel might not be available, that's fine
+            }
         }
     }
 
@@ -49,13 +62,24 @@ class CreatePostViewModel(
     }
 
     fun createPost() {
-//        if (_postButtonState.value == ButtonState.Disabled) return
-
         val userId = userDataStore.currentUserId
-        if(userId.isNullOrEmpty()) return
+        if (userId.isNullOrEmpty()) {
+            _postUiDataState.value = CreatePostUiState.Error("User not authenticated")
+            return
+        }
+
+        if (_postScreenState.value.selectedBook == null) {
+            _postUiDataState.value = CreatePostUiState.Error("Please select a book")
+            return
+        }
+
+        if (_postScreenState.value.postCaption.isEmpty()) {
+            _postUiDataState.value = CreatePostUiState.Error("Please add your thoughts")
+            return
+        }
 
         viewModelScope.launch {
-            _postScreenState.update { it.copy(uiState = CreatePostUiState.Loading) }
+            _postUiDataState.value = CreatePostUiState.Loading
 
             try {
                 val uploadedImageUrls = _postScreenState.value.selectedImages.map { imageFile ->
@@ -72,7 +96,7 @@ class CreatePostViewModel(
                     post = PostData(
                         caption = _postScreenState.value.postCaption,
                         images = uploadedImageUrls,
-                        bookName = _postScreenState.value.bookTitle,
+                        bookName = _postScreenState.value.selectedBook?.volumeInfo?.title ?: "",
                         bookLink = _postScreenState.value.bookLink,
                         bookId = _postScreenState.value.selectedBook?.id ?: "",
                         bookCategories = bookCategories,
@@ -81,32 +105,16 @@ class CreatePostViewModel(
                 )
 
                 createPostUseCase.invoke(requestBody).collect { result ->
-                    result.onSuccess {
-                        _postScreenState.update {
-                            it.copy(uiState = CreatePostUiState.Success("Post created successfully"))
-                        }
+                    result.onSuccess { response ->
+                        _postUiDataState.value =
+                            CreatePostUiState.Success("Post created successfully")
                         clearForm()
                     }
                     result.onFailure { exception ->
-                        println(exception)
-//                        _postScreenState.update {
-//                            it.copy(
-//                                uiState = CreatePostUiState.Error(
-//                                    exception.message ?: "Something went wrong"
-//                                )
-//                            )
-//                        }
-//                        handleError(exception)
+                        handleError(exception)
                     }
                 }
             } catch (exception: Exception) {
-                _postScreenState.update {
-                    it.copy(
-                        uiState = CreatePostUiState.Error(
-                            exception.message ?: "Something went wrong"
-                        )
-                    )
-                }
                 handleError(exception)
             }
         }
@@ -132,28 +140,17 @@ class CreatePostViewModel(
             else -> exception.message ?: "Unknown error occurred"
         }
 
-        _postScreenState.update {
-            it.copy(uiState = CreatePostUiState.Error(errorMessage))
-        }
-    }
-
-    private fun enablePostButton() {
-        val currentState = _postScreenState.value
-        val isButtonEnabled = currentState != CreatePostUiState.Loading &&
-                currentState.bookTitle.isNotEmpty() &&
-                currentState.postCaption.isNotEmpty()
-
-        _postButtonState.value = if (isButtonEnabled) ButtonState.Enabled else ButtonState.Disabled
+        _postUiDataState.value = CreatePostUiState.Error(errorMessage)
     }
 
     private fun clearForm() {
-//        _postScreenState.update {
-//            TODO("clear form")
-//        }
+        _postScreenState.update {
+            CreatePostScreenState()
+        }
     }
 
     override fun onCleared() {
-        clearForm()
+        bookSelectionJob?.cancel()
         super.onCleared()
     }
 }

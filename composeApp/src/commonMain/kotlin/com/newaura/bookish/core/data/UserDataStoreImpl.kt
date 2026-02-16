@@ -43,8 +43,11 @@ class UserDataStoreImpl(
 
     override suspend fun setUserId(userId: String) {
         _currentUserId.value = userId
-        print("Shubham ==>  Setting user Id: $userId")
         appDataStoreRepository.setValue(DataStoreKeys.USER_ID, userId)
+    }
+
+    override suspend fun getAuthToken(): String {
+        return appDataStoreRepository.readValue(DataStoreKeys.AUTH_TOKEN) ?: ""
     }
 
     override suspend fun setAuthToken(authToken: String) {

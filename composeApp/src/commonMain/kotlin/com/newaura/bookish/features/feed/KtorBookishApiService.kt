@@ -99,16 +99,16 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
     }
 
     override suspend fun getHomeFeed(page: Int, limit: Int): FeedApiResponse? {
-        var response: FeedApiResponse? = null
-        try {
-            response = httpClient.get("$BASE_URL/api/bookish/home/feed") {
+        return try {
+            val httpResponse = httpClient.get("$BASE_URL/api/bookish/home/feed") {
                 parameter("page", page)
                 parameter("offset", limit)
-            }.body<FeedApiResponse>()
+            }
+            httpResponse.body<FeedApiResponse>()
         } catch (ex: Exception) {
             AppLogger.e("Error fetching home feed", ex)
+            throw ex
         }
-        return response
     }
 
     override suspend fun getFeedDetail(feedId: String): FeedData? {

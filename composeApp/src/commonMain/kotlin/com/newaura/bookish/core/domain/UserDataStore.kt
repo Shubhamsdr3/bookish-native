@@ -17,6 +17,7 @@ interface UserDataStore {
 
     suspend fun setUserId(userId: String)
 
+    suspend fun getAuthToken(): String
     suspend fun setAuthToken(authToken: String)
 
     fun clear()

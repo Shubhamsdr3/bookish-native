@@ -6,9 +6,11 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.newaura.bookish.core.Context
 import com.newaura.bookish.core.SplashScreen
 import com.newaura.bookish.core.common.AppTheme
+import com.newaura.bookish.core.config.JwtConfig
 import com.newaura.bookish.core.data.AppDataStoreRepositoryManager
 import com.newaura.bookish.core.data.UserDataStoreImpl
 import com.newaura.bookish.core.domain.AppDataStoreRepository
+import com.newaura.bookish.core.domain.JwtTokenValidator
 import com.newaura.bookish.core.domain.UserDataStore
 import com.newaura.bookish.features.auth.di.authDataModule
 import com.newaura.bookish.features.auth.di.authDomainModule
@@ -64,4 +66,11 @@ fun initKoin(context: Context, config: KoinAppDeclaration? = null) {
             searchModule
         )
     }
+
+    // Initialize JWT validator with backend public key
+    initializeJwtValidator()
+}
+
+private fun initializeJwtValidator() {
+    JwtTokenValidator.setPublicKey(JwtConfig.BACKEND_PUBLIC_KEY)
 }

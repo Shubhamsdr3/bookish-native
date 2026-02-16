@@ -13,12 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,17 +27,18 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,10 +61,13 @@ class SearchBooksScreen : Screen {
         val viewModel = koinViewModel<SearchBooksViewModel>()
         val screenState by viewModel.screenState.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
-        val searchQuery = remember { mutableStateOf("") }
+        val focusRequester = remember { FocusRequester() }
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
 
         Scaffold(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
             containerColor = Color(0xFFF5F5F5),
             topBar = {
                 TopAppBar(
@@ -71,7 +75,27 @@ class SearchBooksScreen : Screen {
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp),
                     title = {
-                        TextViewMedium("Search Books")
+                        OutlinedTextField(
+                            value = screenState.searchQuery,
+                            onValueChange = { query ->
+                                viewModel.onSearchQueryChanged(query)
+                            },
+                            placeholder = {
+                                TextViewBody(
+                                    "Search for a book...",
+                                    color = Color.LightGray
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(46.dp)
+                                .padding(horizontal = 12.dp)
+                                .focusRequester(focusRequester)
+                        )
                     },
                     navigationIcon = {
                         Icon(
@@ -91,43 +115,6 @@ class SearchBooksScreen : Screen {
                     .padding(paddingValues)
                     .padding(16.dp)
             ) {
-                // Search TextField
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = searchQuery.value,
-                        onValueChange = { searchQuery.value = it },
-                        placeholder = {
-                            TextViewBody(
-                                "Search books...",
-                                color = Color.LightGray
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f)
-                    )
-                    Button(
-                        onClick = {
-                            viewModel.searchBooks(searchQuery.value)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Blue,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.height(56.dp)
-                    ) {
-                        Text("Search")
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -137,12 +124,15 @@ class SearchBooksScreen : Screen {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.TopCenter
                         ) {
-                            TextViewBody(
-                                "Search for books to get started",
-                                color = Color.Gray
-                            )
+                            Column {
+                                Icon(Icons.Filled.Book, contentDescription = "Open book")
+                                TextViewBody(
+                                    "Type to search for books you're reading",
+                                    color = Color.Gray
+                                )
+                            }
                         }
                     }
 
@@ -204,7 +194,7 @@ class SearchBooksScreen : Screen {
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Button(
-                                    onClick = { viewModel.searchBooks(searchQuery.value) },
+                                    onClick = { viewModel.onSearchQueryChanged(screenState.searchQuery) },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color.Blue
                                     )

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class FeedApiResponse(
     @SerialName("isSuccess")
-    val isSuccess: Boolean,
+    val isSuccess: Boolean? = null,
     @SerialName("data")
     val data: List<FeedData> = emptyList(),
     @SerialName("currentPage")
