@@ -1,24 +1,20 @@
-package com.newaura.bookish.features.post
+package com.newaura.bookish.features.post.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.newaura.bookish.core.data.ButtonState
 import com.newaura.bookish.core.domain.UserDataStore
-import com.newaura.bookish.features.post.data.CreatePostRequest
-import com.newaura.bookish.features.post.data.ImageFile
-import com.newaura.bookish.features.post.data.PostData
+import com.newaura.bookish.features.post.data.dto.CreatePostRequest
+import com.newaura.bookish.features.post.data.dto.ImageFile
+import com.newaura.bookish.features.post.data.dto.PostData
 import com.newaura.bookish.features.post.domain.CreatePostUseCase
-import com.newaura.bookish.features.post.ui.CreatePostScreenState
-import com.newaura.bookish.features.post.ui.CreatePostUiState
-import com.newaura.bookish.features.search.ui.SearchBooksViewModel
-import com.newaura.bookish.model.BookDetail
-import kotlinx.coroutines.Job
+import com.newaura.bookish.features.post.domain.model.ImageFileMapper
+import io.github.ismoy.imagepickerkmp.domain.models.GalleryPhotoResult
+import io.github.ismoy.imagepickerkmp.domain.models.PhotoResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent
 
 class CreatePostViewModel(
     private val createPostUseCase: CreatePostUseCase,
@@ -31,34 +27,41 @@ class CreatePostViewModel(
     private val _postUiDataState = MutableStateFlow<CreatePostUiState>(CreatePostUiState.Idle)
     val postUiDataState: StateFlow<CreatePostUiState> = _postUiDataState.asStateFlow()
 
-    private val _postButtonState = MutableStateFlow<ButtonState>(ButtonState.Disabled)
-    val postButtonState: StateFlow<ButtonState> = _postButtonState.asStateFlow()
-
-    private var bookSelectionJob: Job? = null
-
-    init {
-        listenToSelectedBook()
+    fun updateUiState(postScreenState: CreatePostScreenState) {
+        _postScreenState.update { postScreenState }
     }
 
-    private fun listenToSelectedBook() {
-        bookSelectionJob = viewModelScope.launch {
-            try {
-                val searchViewModel = KoinJavaComponent.get<SearchBooksViewModel>(SearchBooksViewModel::class.java)
-                searchViewModel.screenState.collect { searchState ->
-                    if (searchState.selectedBook != null) {
-                        _postScreenState.update { currentState ->
-                            currentState.copy(selectedBook = searchState.selectedBook)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                // SearchBooksViewModel might not be available, that's fine
-            }
+    fun addGalleryImages(photos: List<GalleryPhotoResult>) {
+        println("🖼️ addGalleryImages called with ${photos.size} photos")
+        val images = photos.map { ImageFileMapper.mapGalleryPhotoToImageFile(it) }
+        println("📸 Mapped to ${images.size} ImageFile objects")
+        _postScreenState.update { currentState ->
+            val newImages = currentState.selectedImages + images
+            println("📱 Updated state: previous=${currentState.selectedImages.size}, added=${images.size}, total=${newImages.size}")
+            currentState.copy(
+                selectedImages = newImages
+            )
         }
     }
 
-    fun updateUiState(postScreenState: CreatePostScreenState) {
-        _postScreenState.value = postScreenState
+    fun addCameraImage(photo: PhotoResult) {
+        println("📷 addCameraImage called with 1 photo")
+        val image = ImageFileMapper.mapPhotoToImageFile(photo)
+        _postScreenState.update { currentState ->
+            val newImages = currentState.selectedImages + image
+            println("📱 Updated state: previous=${currentState.selectedImages.size}, added=1, total=${newImages.size}")
+            currentState.copy(
+                selectedImages = newImages
+            )
+        }
+    }
+
+    fun removeImage(imageFile: ImageFile) {
+        _postScreenState.update { currentState ->
+            currentState.copy(
+                selectedImages = currentState.selectedImages.filter { it != imageFile }
+            )
+        }
     }
 
     fun createPost() {
@@ -105,7 +108,7 @@ class CreatePostViewModel(
                 )
 
                 createPostUseCase.invoke(requestBody).collect { result ->
-                    result.onSuccess { response ->
+                    result.onSuccess {
                         _postUiDataState.value =
                             CreatePostUiState.Success("Post created successfully")
                         clearForm()
@@ -148,10 +151,4 @@ class CreatePostViewModel(
             CreatePostScreenState()
         }
     }
-
-    override fun onCleared() {
-        bookSelectionJob?.cancel()
-        super.onCleared()
-    }
 }
-
