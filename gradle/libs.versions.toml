@@ -9,7 +9,7 @@ androidx-core = "1.17.0"
 androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.9.6"
 composeHotReload = "1.0.0"
-composeMultiplatform = "1.10.0"
+composeMultiplatform = "1.10.1"
 junit = "4.13.2"
 kotlin = "2.3.10"
 kotlinx-coroutines = "1.10.2"
@@ -21,10 +21,12 @@ compose = "1.10.3"
 cmp-version = "1.7.3"
 voyager = "1.1.0-beta03"
 firebase-auth = "24.0.1"
+firebase-storage = "22.0.1"
 google-service = "4.4.4"
 firebase-gitlive = "2.4.0"
 datastoreCore = "1.2.0"
 kotlin-datetime = "0.7.1"
+imagepickerkmp = "1.0.32"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -74,8 +76,11 @@ voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", vers
 
 # firebase auth
 firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebase-auth" }
+firebase-storage = { module = "com.google.firebase:firebase-storage", version.ref = "firebase-storage" }
 firebase-gitlive = { module = "dev.gitlive:firebase-auth", version.ref = "firebase-gitlive" }
 androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastoreCore" }
+imagepickerkmp = { module = "io.github.ismoy:imagepickerkmp", version.ref = "imagepickerkmp" }
+
 
 [bundles]
 compose = [

@@ -82,7 +82,7 @@ class LoginViewModel(
 
     fun verifyOtp() {
         val state = _screenState.value
-        if (state.otp.length < 5) return
+        if (state.otp.length != 6) return
 
         viewModelScope.launch {
             _screenState.update { it.copy(uiState = LoginUiState.Loading) }
@@ -151,5 +151,9 @@ class LoginViewModel(
         _screenState.update {
             it.copy(isOtpScreen = false, otp = "", uiState = LoginUiState.Idle)
         }
+    }
+
+    fun onOtpChange(otp: String) {
+        _screenState.update { it.copy(otp = otp) }
     }
 }

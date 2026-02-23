@@ -1,6 +1,6 @@
 package com.newaura.bookish.features.post.ui
 
-import com.newaura.bookish.features.post.data.ImageFile
+import com.newaura.bookish.features.post.data.dto.ImageFile
 import com.newaura.bookish.model.BookDetail
 import com.newaura.bookish.model.PostType
 

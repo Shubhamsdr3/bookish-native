@@ -1,7 +1,7 @@
 package com.newaura.bookish.features.feed
 
 import com.newaura.bookish.core.network.ApiResponse
-import com.newaura.bookish.features.post.data.CreatePostRequest
+import com.newaura.bookish.features.post.data.dto.CreatePostRequest
 import com.newaura.bookish.model.FeedData
 import com.newaura.bookish.model.FeedResponse
 import com.newaura.bookish.model.FeedApiResponse
@@ -30,7 +30,7 @@ import kotlinx.serialization.json.Json
 import io.ktor.http.content.OutgoingContent
 import io.ktor.client.plugins.observer.ResponseObserver
 import com.newaura.bookish.core.util.AppLogger
-import com.newaura.bookish.model.GoogleBooksResponse
+import com.newaura.bookish.features.search.data.model.SearchResultResponse
 import io.ktor.client.request.HttpRequest
 
 class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
@@ -120,14 +120,18 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
         return response.status == HttpStatusCode.OK
     }
 
-    override suspend fun createPost(createPostRequest: CreatePostRequest): ApiResponse<FeedData>? {
+    override suspend fun createPost(createPostRequest: CreatePostRequest): FeedResponse {
         return try {
             val httpResponse = httpClient.post("$BASE_URL/api/bookish/createPost") {
                 contentType(ContentType.Application.Json)
                 setBody(createPostRequest)
             }
-            httpResponse.body<ApiResponse<FeedData>>()
+            val response = httpResponse.body<FeedResponse>()
+            AppLogger.d("Create Post Response: $response")
+            response
         } catch (ex: Exception) {
+            AppLogger.e("Error creating post", ex)
+            AppLogger.e("Full exception details: ${ex.stackTraceToString()}")
             throw ex
         }
     }
@@ -165,21 +169,20 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
         }
     }
 
-    override suspend fun searchBooks(query: String, maxResults: Int): GoogleBooksResponse? {
+    override suspend fun setAuthToken(authToken: String) {
+        this.authToken = authToken
+    }
+
+    override suspend fun searchBook(query: String): ApiResponse<SearchResultResponse>? {
         return try {
-            val response = httpClient.get("https://www.googleapis.com/books/v1/volumes") {
-                parameter("q", query)
-                parameter("maxResults", maxResults)
-            }.body<GoogleBooksResponse>()
+            val response = httpClient.get("$BASE_URL/api/bookish/book/search") {
+                parameter("searchTerm", query)
+            }.body<ApiResponse<SearchResultResponse>>()
             AppLogger.d("Search Books Response: $response")
             response
         } catch (ex: Exception) {
             AppLogger.e("Error searching books", ex)
             null
         }
-    }
-
-    override suspend fun setAuthToken(authToken: String) {
-        this.authToken = authToken
     }
 }

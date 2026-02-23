@@ -7,9 +7,18 @@ object AppLogger {
         println("[$TAG] DEBUG: $message")
     }
 
-    fun e(message: String, throwable: Throwable? = null) {
+    fun e(message: String?, throwable: Throwable? = null) {
         println("[$TAG] ERROR: $message")
         throwable?.printStackTrace()
+    }
+
+    fun e(throwable: Throwable? = null) {
+        println("[$TAG] ERROR: ${throwable?.message}")
+        throwable?.printStackTrace()
+    }
+
+    fun e(message: String? = null) {
+        println("[$TAG] ERROR: $message")
     }
 
     fun i(message: String) {

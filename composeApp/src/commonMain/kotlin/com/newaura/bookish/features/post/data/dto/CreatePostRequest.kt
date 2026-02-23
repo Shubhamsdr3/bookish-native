@@ -1,4 +1,4 @@
-package com.newaura.bookish.features.post.data
+package com.newaura.bookish.features.post.data.dto
 
 import kotlinx.serialization.Serializable
 

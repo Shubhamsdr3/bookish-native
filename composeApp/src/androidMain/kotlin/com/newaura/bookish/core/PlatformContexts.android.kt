@@ -5,6 +5,5 @@ import androidx.compose.runtime.Composable
 
 @Composable
 actual fun getActivityContext(): ActivityContext {
-    val context = LocalActivity.current as ActivityContext
-    return context
+    return LocalActivity.current as ActivityContext
 }

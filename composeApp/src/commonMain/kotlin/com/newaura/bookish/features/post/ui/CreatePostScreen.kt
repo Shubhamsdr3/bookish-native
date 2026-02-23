@@ -1,5 +1,6 @@
 package com.newaura.bookish.features.post.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -11,10 +12,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,26 +42,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import coil3.compose.AsyncImage
 import com.newaura.bookish.core.common.TextViewBody
 import com.newaura.bookish.core.common.TextViewMedium
+import com.newaura.bookish.core.ui.BookDetailCard
 import com.newaura.bookish.core.util.toCamelCase
-import com.newaura.bookish.features.post.CreatePostViewModel
-import com.newaura.bookish.features.search.ui.SearchBooksScreen
+import com.newaura.bookish.features.post.data.dto.ImageFile
+import com.newaura.bookish.features.post.util.convertFileUriToCoilModel
+import com.newaura.bookish.model.BookDetail
 import com.newaura.bookish.model.PostType
 import org.koin.compose.koinInject
 
-class CreatePostScreen : Screen {
+class CreatePostScreen(val bookDetail: BookDetail) : Screen {
 
     @OptIn(ExperimentalMaterial3Api::class)
-    @Preview
     @Composable
     override fun Content() {
+
         val viewModel = koinInject<CreatePostViewModel>()
         val postScreenState by viewModel.postScreenState.collectAsState()
         val postUiState by viewModel.postUiDataState.collectAsState()
@@ -63,17 +75,23 @@ class CreatePostScreen : Screen {
         val options = PostType.entries.toList()
         var selected by remember { mutableStateOf(0) }
 
-        // Handle navigation effects
         LaunchedEffect(postUiState) {
             when (postUiState) {
                 is CreatePostUiState.Success -> {
                     navigator.popUntilRoot()
                 }
+
                 is CreatePostUiState.NavigateToHome -> {
                     navigator.popUntilRoot()
                 }
                 else -> {}
             }
+        }
+
+        // Force recomposition when selectedImages changes
+        LaunchedEffect(postScreenState.selectedImages.size) {
+            val imageSize = postScreenState.selectedImages.size
+            println("Shubham ==> ${imageSize}")
         }
 
         Scaffold(
@@ -120,44 +138,22 @@ class CreatePostScreen : Screen {
                         .fillMaxSize()
                         .padding(paddingValues)
                         .padding(all = 16.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    TextViewBody("Select book")
+                    TextViewBody("Selected book")
                     Spacer(Modifier.height(12.dp))
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(
-                                onClick = {
-//                                    navigator.push(SearchBooksScreen())
-                                },
-                                indication = ripple(bounded = true),
-                                interactionSource = remember { MutableInteractionSource() }
-                            )
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        OutlinedTextField(
-                            value = postScreenState.selectedBook?.volumeInfo?.title ?: "",
-                            onValueChange = {},
-                            placeholder = {
-                                TextViewBody(
-                                    "Search book",
-                                    color = Color.LightGray
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Default.Search, contentDescription = "")
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            enabled = false,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        BookDetailCard(bookDetail, onClick = {
+                            navigator.pop()
+                        })
                     }
                     Spacer(Modifier.height(16.dp))
                     PostTypeSelector(
                         options = options,
                         selectedIndex = selected,
-                        onSelected = {
-                            selected = it
-                        }
+                        onSelected = { selected = it }
                     )
                     Spacer(Modifier.height(24.dp))
                     TextViewBody("Your thoughts")
@@ -178,8 +174,54 @@ class CreatePostScreen : Screen {
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp)
+                            .height(150.dp)
                     )
+                    Spacer(Modifier.height(24.dp))
+
+                    TextViewBody("Attach images")
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        GalleryButton(
+                            modifier = Modifier.weight(1f),
+                            viewModel = viewModel,
+                            navigator = navigator
+                        )
+                        CameraButton(
+                            modifier = Modifier.weight(1f),
+                            viewModel = viewModel,
+                            navigator = navigator
+                        )
+                    }
+
+                    TextViewBody("Selected images (${postScreenState.selectedImages.size})")
+                    Spacer(Modifier.height(12.dp))
+
+                    // Use a key to force recomposition when list changes
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(
+                                items = postScreenState.selectedImages,
+                                key = { imageFile -> "${imageFile.path}-${imageFile.name}".hashCode() }
+                            ) { imageFile ->
+                                ImageThumbnail(
+                                    imageFile = imageFile,
+                                    onRemove = {
+                                        viewModel.removeImage(imageFile)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(24.dp))
+
                     Spacer(Modifier.weight(1f))
                     Row(
                         modifier = Modifier
@@ -199,16 +241,18 @@ class CreatePostScreen : Screen {
                         ) {
                             TextViewBody("Cancel")
                         }
+                        val isEnabled = contentDescription.value.isNotEmpty() &&
+                                postUiState != CreatePostUiState.Loading
                         Button(
-                            enabled = postScreenState.selectedBook != null &&
-                                    contentDescription.value.isNotEmpty() &&
-                                    postUiState != CreatePostUiState.Loading,
+                            enabled = isEnabled,
                             onClick = {
                                 viewModel.updateUiState(
                                     postScreenState.copy(
                                         postCaption = contentDescription.value,
-                                        bookTitle = postScreenState.selectedBook?.volumeInfo?.title ?: "",
-                                        selectedPostType = options[selected]
+                                        bookTitle = postScreenState.selectedBook?.volumeInfo?.title
+                                            ?: "",
+                                        selectedPostType = options[selected],
+                                        selectedBook = bookDetail
                                     )
                                 )
                                 viewModel.createPost()
@@ -226,6 +270,49 @@ class CreatePostScreen : Screen {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ImageThumbnail(
+    imageFile: ImageFile,
+    onRemove: () -> Unit
+) {
+    val modelForCoil = convertFileUriToCoilModel(imageFile.path)
+
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.LightGray)
+    ) {
+        AsyncImage(
+            model = modelForCoil,
+            contentDescription = imageFile.name,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        // Remove button overlay
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(28.dp)
+                .background(
+                    color = Color.Black.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .clickable(indication = ripple(radius = 14.dp), interactionSource = remember { MutableInteractionSource() }) {
+                    onRemove()
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Remove image",
+                tint = Color.White,
+                modifier = Modifier.size(16.dp)
+            )
         }
     }
 }
@@ -255,5 +342,109 @@ fun PostTypeSelector(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun GalleryButton(
+    modifier: Modifier = Modifier,
+    viewModel: CreatePostViewModel,
+    navigator: cafe.adriel.voyager.navigator.Navigator
+) {
+    var shouldPopScreen by remember { mutableStateOf(false) }
+
+    if (shouldPopScreen) {
+        LaunchedEffect(Unit) {
+            navigator.pop()
+            shouldPopScreen = false
+        }
+    }
+
+    Button(
+        onClick = {
+            println("🔘 Gallery button clicked")
+            navigator.push(
+                CaptureImageScreen(
+                    pickImage = PickImage.FROM_GALLERY,
+                    onGalleryImageResult = { photos ->
+                        println("✅ Gallery callback invoked with ${photos.size} photos")
+                        viewModel.addGalleryImages(photos)
+                        println("✅ ViewModel.addGalleryImages() called")
+                        shouldPopScreen = true
+                    },
+                    onDismiss = {
+                        println("❌ Gallery dismiss callback invoked")
+                        navigator.pop()
+                    }
+                )
+            )
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF6200EE),
+            contentColor = Color.White
+        ),
+        modifier = modifier
+    ) {
+        Icon(
+            imageVector = Icons.Default.Image,
+            contentDescription = "Gallery",
+            modifier = Modifier.size(20.dp),
+            tint = Color.White
+        )
+        Spacer(Modifier.size(8.dp))
+        TextViewBody("Gallery", color = Color.White)
+    }
+}
+
+@Composable
+fun CameraButton(
+    modifier: Modifier = Modifier,
+    viewModel: CreatePostViewModel,
+    navigator: cafe.adriel.voyager.navigator.Navigator
+) {
+    var shouldPopScreen by remember { mutableStateOf(false) }
+
+    if (shouldPopScreen) {
+        LaunchedEffect(Unit) {
+            navigator.pop()
+            shouldPopScreen = false
+        }
+    }
+
+    Button(
+        onClick = {
+            println("🔘 Camera button clicked")
+            navigator.push(
+                CaptureImageScreen(
+                    PickImage.FROM_CAMERA,
+                    onCameraImageResult = { photos ->
+                        println("✅ Camera callback invoked with ${photos.size} photos")
+                        photos.forEach { photo ->
+                            println("📷 Processing camera photo: ${photo.fileName}")
+                            viewModel.addCameraImage(photo)
+                        }
+                        shouldPopScreen = true
+                    },
+                    onDismiss = {
+                        println("❌ Camera dismiss callback invoked")
+                        navigator.pop()
+                    }
+                )
+            )
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF03DAC6),
+            contentColor = Color.Black
+        ),
+        modifier = modifier
+    ) {
+        Icon(
+            imageVector = Icons.Default.Camera,
+            contentDescription = "Camera",
+            modifier = Modifier.size(20.dp),
+            tint = Color.Black
+        )
+        Spacer(Modifier.size(8.dp))
+        TextViewBody("Camera", color = Color.Black)
     }
 }

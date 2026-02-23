@@ -3,9 +3,10 @@ package com.newaura.bookish.features.feed
 import com.newaura.bookish.core.util.AppLogger
 import com.newaura.bookish.features.FeedRepository
 import com.newaura.bookish.features.feed.data.FeedLocalDataSource
-import com.newaura.bookish.features.post.data.CreatePostRequest
+import com.newaura.bookish.features.post.data.dto.CreatePostRequest
 import com.newaura.bookish.model.FeedData
 import com.newaura.bookish.model.FeedApiResponse
+import com.newaura.bookish.model.FeedResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -70,18 +71,18 @@ class FeedRepositoryImpl(
         }
     }
 
-    override suspend fun createPost(createPostRequest: CreatePostRequest): Flow<Result<FeedData?>> = flow {
+    override suspend fun createPost(createPostRequest: CreatePostRequest): Flow<Result<FeedResponse?>> = flow {
         try {
             val response = apiService.createPost(createPostRequest)
-            if (response?.isSuccess == true && response.data != null) {
+            if (response.isSuccess == true) {
                 AppLogger.d("Create post successful: ${response.data}")
-                emit(Result.success(response.data))
+                emit(Result.success(response))
             } else {
-                AppLogger.e("Create post failed: ${response?.message}")
-                emit(Result.failure(Exception(response?.message ?: "Unknown error")))
+                AppLogger.e("Something went wrong")
+                emit(Result.failure(Exception("Something went wrong")))
             }
         } catch (e: Exception) {
-            AppLogger.e("Error creating post", e)
+            AppLogger.e(e)
             emit(Result.failure(e))
         }
     }

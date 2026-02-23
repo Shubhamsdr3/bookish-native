@@ -34,6 +34,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.newaura.bookish.core.common.TextViewBody
 import com.newaura.bookish.core.data.ButtonState
 import com.newaura.bookish.core.getActivityContext
+import com.newaura.bookish.features.OtpVerificationScreen
 import com.newaura.bookish.features.feed.ui.LoginUiState
 import com.newaura.bookish.features.feed.ui.LoginViewModel
 import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen
@@ -58,29 +59,22 @@ class LoginScreen() : Screen {
             }
         }
 
-        if (screenState.isOtpScreen) {
-            OtpVerificationContent(
-                otp = screenState.otp,
-                phoneNumber = screenState.phoneNumber,
-                isLoading = screenState.uiState is LoginUiState.Loading,
-                error = (screenState.uiState as? LoginUiState.Error)?.message,
-                onOtpChange = viewModel::updateOtp,
-                onVerify = viewModel::verifyOtp,
-                onBack = viewModel::goBack
-            )
-        } else {
-            PhoneLoginContent(
-                phoneNumber = screenState.phoneNumber,
-                isLoading = screenState.uiState is LoginUiState.Loading,
-                error = (screenState.uiState as? LoginUiState.Error)?.message,
-                onPhoneChange = viewModel::updatePhoneNumber,
-                onSendOtp =  {
-                    viewModel.sendOtp(activityContext)
-                },
-                enabled = viewModel.otpButtonState.value == ButtonState.Enabled,
-                onGoogleSignIn = viewModel::signInWithGoogle
-            )
-        }
+        PhoneLoginContent(
+            phoneNumber = screenState.phoneNumber,
+            isLoading = screenState.uiState is LoginUiState.Loading,
+            error = (screenState.uiState as? LoginUiState.Error)?.message,
+            onPhoneChange = viewModel::updatePhoneNumber,
+            onSendOtp = {
+                viewModel.sendOtp(activityContext)
+                navigator.push(
+                    OtpVerificationScreen(
+                        phoneNumber = screenState.phoneNumber
+                    )
+                )
+            },
+            enabled = viewModel.otpButtonState.value == ButtonState.Enabled,
+            onGoogleSignIn = viewModel::signInWithGoogle
+        )
     }
 
     @Composable
@@ -170,81 +164,6 @@ class LoginScreen() : Screen {
                 enabled = !isLoading
             ) {
                 Text("Sign in with Google")
-            }
-        }
-    }
-
-    @Composable
-    private fun OtpVerificationContent(
-        otp: String,
-        phoneNumber: String,
-        isLoading: Boolean,
-        error: String?,
-        onOtpChange: (String) -> Unit,
-        onVerify: () -> Unit,
-        onBack: () -> Unit
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Verification Code",
-                style = MaterialTheme.typography.headlineMedium
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Enter the OTP sent to $phoneNumber",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            OutlinedTextField(
-                value = otp,
-                onValueChange = { if (it.length <= 6) onOtpChange(it) },
-                label = { Text("OTP") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading
-            )
-
-            error?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = onVerify,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading && otp.length >= 5
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
-                    Text("Verify")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TextButton(onClick = onBack) {
-                Text("Go Back")
             }
         }
     }

@@ -21,6 +21,8 @@ import com.newaura.bookish.features.feed.di.commonModule
 import com.newaura.bookish.features.feed.di.feedDataModule
 import com.newaura.bookish.features.home.di.homePresentationModule
 import com.newaura.bookish.features.post.di.createPostModule
+import com.newaura.bookish.features.post.domain.FilePicker
+import com.newaura.bookish.features.post.ui.FilePickerImpl
 import com.newaura.bookish.features.search.di.searchModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
@@ -53,6 +55,10 @@ fun initKoin(context: Context, config: KoinAppDeclaration? = null) {
             }
         }
 
+        val filePicker = module {
+            single<FilePicker> { FilePickerImpl() }
+        }
+
         modules(
             commonModule,
             dataStoreModule,
@@ -63,7 +69,8 @@ fun initKoin(context: Context, config: KoinAppDeclaration? = null) {
             authDomainModule,
             authServiceModule,
             createPostModule,
-            searchModule
+            searchModule,
+            filePicker
         )
     }
 

@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.SubcomposeAsyncImage
+import com.newaura.bookish.core.util.AppLogger
 
 @Composable
 fun NetworkImage(
@@ -22,6 +23,9 @@ fun NetworkImage(
         contentDescription = contentDescription,
         modifier = modifier,
         contentScale = contentScale,
+        onError = ({ error ->
+           AppLogger.e(error.result.throwable)
+        }),
         loading = {
             Box(
                 modifier = Modifier.fillMaxSize(),

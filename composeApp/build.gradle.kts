@@ -59,6 +59,7 @@ kotlin {
             implementation(libs.ktor.client.android)
             // firebase auth
             implementation(libs.firebase.auth)
+            implementation(libs.firebase.storage)
 
             implementation(libs.androidx.datastore.datastore)
             implementation(libs.androidx.datastore.preferences)
@@ -99,6 +100,10 @@ kotlin {
             implementation(libs.voyager.transitions)
             implementation(compose.components.resources)
             implementation(libs.kt.date.time)
+
+            //  Image Picker
+            implementation(libs.imagepickerkmp)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

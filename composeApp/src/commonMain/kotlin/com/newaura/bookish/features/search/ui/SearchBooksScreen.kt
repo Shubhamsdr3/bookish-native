@@ -1,18 +1,14 @@
 package com.newaura.bookish.features.search.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,21 +31,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.newaura.bookish.core.common.TextViewBody
-import com.newaura.bookish.core.common.TextViewMedium
-import com.newaura.bookish.core.ui.NetworkImage
-import com.newaura.bookish.model.BookDetail
+import com.newaura.bookish.core.ui.BookDetailCard
+import com.newaura.bookish.features.post.ui.CreatePostScreen
+import com.newaura.bookish.features.search.domain.model.BookSearchUiState
 import org.koin.compose.viewmodel.koinViewModel
 
 class SearchBooksScreen : Screen {
@@ -80,6 +73,10 @@ class SearchBooksScreen : Screen {
                             onValueChange = { query ->
                                 viewModel.onSearchQueryChanged(query)
                             },
+                            textStyle = TextStyle(
+                                fontSize = 14.sp,
+                                color = Color.Black
+                            ),
                             placeholder = {
                                 TextViewBody(
                                     "Search for a book...",
@@ -167,11 +164,11 @@ class SearchBooksScreen : Screen {
                                     items = state.books,
                                     key = { book -> book.id }
                                 ) { book ->
-                                    BookSearchResultCard(
+                                    BookDetailCard(
                                         book = book,
                                         onClick = {
                                             viewModel.selectBook(book)
-                                            navigator.pop()
+                                            navigator.push(CreatePostScreen(book))
                                         }
                                     )
                                 }
@@ -205,83 +202,6 @@ class SearchBooksScreen : Screen {
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun BookSearchResultCard(
-    book: BookDetail,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
-            .clickable(
-                onClick = onClick,
-                indication = ripple(bounded = true),
-                interactionSource = remember { MutableInteractionSource() }
-            )
-            .padding(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Book Thumbnail
-        NetworkImage(
-            url = book.volumeInfo?.imageLinks?.thumbnail ?: "",
-            contentDescription = "Book Cover",
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop,
-            placeHolder = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.LightGray),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "No Image",
-                        tint = Color.Gray
-                    )
-                }
-            }
-        )
-
-        // Book Info
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            TextViewMedium(
-                text = book.volumeInfo?.title ?: "Unknown Title",
-                fontSize = 14.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            book.volumeInfo?.authors?.firstOrNull()?.let {
-                TextViewBody(
-                    text = "by $it",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            book.volumeInfo?.publishedDate?.let {
-                TextViewBody(
-                    text = it,
-                    fontSize = 11.sp,
-                    color = Color.LightGray
-                )
             }
         }
     }

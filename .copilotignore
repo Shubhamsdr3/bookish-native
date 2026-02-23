@@ -1,0 +1,94 @@
+# Build directories
+build/
+.gradle/
+.idea/
+*.iml
+*.apk
+*.aab
+
+# IDE files
+.vscode/
+.DS_Store
+*.swp
+*.swo
+*~
+.classpath
+.project
+.settings/
+.externalNativeBuild/
+
+# Android Studio
+gradle/wrapper/gradle-wrapper.jar
+local.properties
+captures/
+.externalNativeBuild
+.cxx/
+*.jks
+*.keystore
+
+# Gradle
+.gradle
+gradlew
+gradlew.bat
+
+# Generated files
+gen/
+*.class
+*.jar
+*.war
+*.ear
+*.aar
+
+# Dependencies
+node_modules/
+.m2/
+.ivy2/
+
+# Output
+out/
+dist/
+bin/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Kotlin
+.kt.bak
+*.kt.bak
+
+# Test coverage
+coverage/
+.coverage
+htmlcov/
+
+# CI/CD
+.github/workflows/
+
+# Documentation (optional - uncomment if you don't want suggestions on docs)
+# docs/
+# README.md
+
+# Generated navigation files
+composeApp/build/generated/
+
+# Firebase/Google services (secrets)
+google-services.json
+GoogleService-Info.plist
+
+# Configuration cache
+.gradle/
+build/reports/configuration-cache/
+
+# Local development files
+*.local
+.env
+.env.local
+secrets/
+

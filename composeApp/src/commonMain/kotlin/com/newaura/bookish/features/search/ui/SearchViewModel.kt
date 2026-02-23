@@ -2,6 +2,8 @@ package com.newaura.bookish.features.search.ui
 
 import androidx.lifecycle.ViewModel
 import com.newaura.bookish.features.search.domain.SearchBooksUseCase
+import com.newaura.bookish.features.search.domain.model.BookSearchScreenState
+import com.newaura.bookish.features.search.domain.model.BookSearchUiState
 import com.newaura.bookish.model.BookDetail
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,20 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-sealed interface BookSearchUiState {
-    data object Idle : BookSearchUiState
-    data object Loading : BookSearchUiState
-    data class Success(val books: List<BookDetail>) : BookSearchUiState
-    data class Error(val message: String) : BookSearchUiState
-}
-
-data class BookSearchScreenState(
-    val uiState: BookSearchUiState = BookSearchUiState.Idle,
-    val searchQuery: String = "",
-    val selectedBook: BookDetail? = null
-)
-
 class SearchBooksViewModel(
     private val searchBooksUseCase: SearchBooksUseCase,
     coroutineScope: CoroutineScope? = null
@@ -62,7 +50,8 @@ class SearchBooksViewModel(
 
         searchBooksUseCase(query).collect { result ->
             result.fold(
-                onSuccess = { books ->
+                onSuccess = { bookResponse ->
+                    val books = bookResponse.data.items
                     _screenState.update {
                         it.copy(
                             uiState = BookSearchUiState.Success(books),
