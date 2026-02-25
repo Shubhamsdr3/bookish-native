@@ -53,6 +53,7 @@ class CaptureImageScreen(
                     when (pickImage) {
                         PickImage.FROM_GALLERY -> {
                             GalleryPickerLauncher(
+                                allowMultiple = true,
                                 onPhotosSelected = { result ->
                                     onGalleryImageResult(result)
                                     navigator.pop()
@@ -67,7 +68,7 @@ class CaptureImageScreen(
                         }
 
                         PickImage.FROM_CAMERA -> {
-                            println("📷 Rendering ImagePickerLauncher")
+                            AppLogger.d("📷 Rendering ImagePickerLauncher")
                             ImagePickerLauncher(
                                 config = ImagePickerConfig(
                                     onPhotoCaptured = { result ->

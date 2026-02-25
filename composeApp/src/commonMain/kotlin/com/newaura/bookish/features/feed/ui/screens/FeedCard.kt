@@ -264,7 +264,7 @@ fun PostCaption(post: FeedPost?) {
                         text = caption,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color.Gray,
+                        color = Color.Black.copy(alpha = 0.8f),
                         fontStyle = FontStyle.Italic
                     )
                 )

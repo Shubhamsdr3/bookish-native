@@ -109,9 +109,9 @@ class LoginViewModel(
             )
             loginUserUseCase(user).collect { result ->
                 result.onSuccess { userData ->
+                    userDataStore.setUserId(userData?.user?.userId ?: "")
+                    userDataStore.setAuthToken(userData?.token ?: "")
                     _screenState.update {
-                        userDataStore.setUserId(userData?.user?.userId ?: "")
-                        userDataStore.setAuthToken(userData?.token ?: "")
                         it.copy(uiState = LoginUiState.Success(userData?.token ?: ""))
                     }
                 }

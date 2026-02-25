@@ -1,6 +1,7 @@
 package com.newaura.bookish.features.auth.data
 
 import com.newaura.bookish.core.ActivityContext
+import com.newaura.bookish.core.util.AppLogger
 import com.newaura.bookish.features.auth.domain.AuthRepository
 import com.newaura.bookish.features.auth.domain.PhoneAuthService
 import com.newaura.bookish.features.feed.AuthState
@@ -24,10 +25,10 @@ class AuthRepositoryImpl(
     ): Result<Boolean> {
         authService.sendVerificationCode(activityContext, phoneNumber) { result ->
             result.onSuccess { id ->
-                println("Shubham ==> SMS Sent successfully. ID: $id")
+                AppLogger.d("SMS Sent successfully. ID: $id")
             }
             result.onFailure { error ->
-                println("Shubham ==> Failed to send SMS: ${error.message}")
+                AppLogger.e("Failed to send SMS: ${error.message}")
             }
         }
         return Result.success(true)

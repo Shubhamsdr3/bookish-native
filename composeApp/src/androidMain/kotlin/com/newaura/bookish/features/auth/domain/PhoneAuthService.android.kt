@@ -7,6 +7,7 @@ import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.newaura.bookish.core.ActivityContext
+import com.newaura.bookish.core.util.AppLogger
 import java.util.concurrent.TimeUnit
 
 actual class PhoneAuthService {
@@ -26,7 +27,7 @@ actual class PhoneAuthService {
                 .setTimeout(120L, TimeUnit.SECONDS)
                 .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                     override fun onVerificationCompleted(p0: PhoneAuthCredential) {
-                        print("Shubham ==> onVerificationCompleted: $p0")
+                        AppLogger.d("onVerificationCompleted: $p0")
                     }
 
                     override fun onCodeSent(
@@ -34,14 +35,14 @@ actual class PhoneAuthService {
                         token: PhoneAuthProvider.ForceResendingToken
                     ) {
                         super.onCodeSent(verificationId, token)
-                        println("Shubham ==> onCodeSent: $verificationId")
+                        AppLogger.d("onCodeSent: $verificationId")
                         _verificationId = verificationId
                         callback(Result.success(verificationId))
                     }
 
                     override fun onVerificationFailed(e: FirebaseException) {
                         // IMPORTANT: Handle reCAPTCHA fallback error here
-                        print("Shubham ==> onVerificationCompleted: $e")
+                        AppLogger.d("onVerificationCompleted: $e")
                         if (e is FirebaseAuthMissingActivityForRecaptchaException) {
                             // This means a reCAPTCHA was needed but no activity was provided.
                             // The activity is now passed in the function call, so this case

@@ -53,12 +53,6 @@ class LoginScreen() : Screen {
 
         val navigator = LocalNavigator.currentOrThrow
 
-        LaunchedEffect(screenState.uiState) {
-            if (screenState.uiState is LoginUiState.Success) {
-                navigator.push(HomeFeedScreen())
-            }
-        }
-
         PhoneLoginContent(
             phoneNumber = screenState.phoneNumber,
             isLoading = screenState.uiState is LoginUiState.Loading,

@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.newaura.bookish.core.util.customImePadding
 import com.newaura.bookish.features.feed.ui.LoginUiState
 import com.newaura.bookish.features.feed.ui.LoginViewModel
+import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 class OtpVerificationScreen(val phoneNumber: String) : Screen {
@@ -52,6 +54,12 @@ class OtpVerificationScreen(val phoneNumber: String) : Screen {
         val screenState by viewModel.screenState.collectAsState()
 
         val navigator = LocalNavigator.currentOrThrow
+
+        LaunchedEffect(screenState.uiState) {
+            if (screenState.uiState is LoginUiState.Success) {
+                navigator.push(HomeFeedScreen())
+            }
+        }
 
         Scaffold(
             topBar = {

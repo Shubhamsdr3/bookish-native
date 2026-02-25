@@ -1,8 +1,13 @@
 package com.newaura.bookish.features.post.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.newaura.bookish.core.domain.UserDataStore
+import com.newaura.bookish.core.util.AppLogger
 import com.newaura.bookish.features.post.data.ImageUploadRepository
 import com.newaura.bookish.features.post.data.dto.CreatePostRequest
 import com.newaura.bookish.features.post.data.dto.ImageFile
@@ -29,7 +34,11 @@ class CreatePostViewModel(
     private val _postUiDataState = MutableStateFlow<CreatePostUiState>(CreatePostUiState.Idle)
     val postUiDataState: StateFlow<CreatePostUiState> = _postUiDataState.asStateFlow()
 
+    private val _selectedPostTypeIndex = MutableStateFlow(0)
+    val selectedPostTypeIndex: StateFlow<Int> = _selectedPostTypeIndex.asStateFlow()
+
     fun updateUiState(postScreenState: CreatePostScreenState) {
+        _selectedPostTypeIndex.update { postScreenState.selectedPostType.ordinal }
         _postScreenState.update { postScreenState }
     }
 
@@ -82,19 +91,13 @@ class CreatePostViewModel(
             _postUiDataState.value = CreatePostUiState.Loading
 
             try {
-                println("🚀 Starting post creation process...")
-
                 // Upload images to Firebase Storage
                 val selectedImages = _postScreenState.value.selectedImages
                 val uploadedImageUrls = if (selectedImages.isNotEmpty()) {
-                    println("📤 Uploading ${selectedImages.size} image(s) to Firebase Storage...")
                     uploadImagesToFirebase(selectedImages)
                 } else {
                     emptyList()
                 }
-
-                println("✅ All images uploaded successfully")
-                println("📝 Uploaded URLs: $uploadedImageUrls")
 
                 val bookCategories =
                     _postScreenState.value.selectedBook?.volumeInfo?.categories?.map { it }
@@ -114,21 +117,18 @@ class CreatePostViewModel(
                     )
                 )
 
-                println("🌐 Sending post request to backend...")
                 createPostUseCase.invoke(requestBody).collect { result ->
                     result.onSuccess {
-                        println("✅ Post created successfully!")
                         _postUiDataState.value =
                             CreatePostUiState.Success("Post created successfully")
                         clearForm()
                     }
                     result.onFailure { exception ->
-                        println("❌ Post creation failed: ${exception.message}")
                         handleError(exception)
                     }
                 }
             } catch (exception: Exception) {
-                println("❌ Error during post creation: ${exception.message}")
+                AppLogger.e(exception)
                 exception.printStackTrace()
                 handleError(exception)
             }
@@ -146,22 +146,20 @@ class CreatePostViewModel(
             val uploadedUrls = mutableListOf<String>()
             imageUploadRepository.uploadImages(imageFiles).collect { result ->
                 result.onSuccess { urls ->
-                    println("☁️  Firebase upload successful - ${urls.size} images uploaded")
                     uploadedUrls.addAll(urls)
                 }.onFailure { exception ->
-                    println("❌ Firebase upload failed: ${exception.message}")
+                    AppLogger.e(exception)
                     throw exception
                 }
             }
 
             uploadedUrls
         } catch (exception: Exception) {
-            println("❌ Image upload error: ${exception.message}")
+            AppLogger.e(exception)
             exception.printStackTrace()
             throw Exception("Failed to upload images: ${exception.message}")
         }
     }
-
 
     private fun handleError(exception: Throwable) {
         val errorMessage = when {

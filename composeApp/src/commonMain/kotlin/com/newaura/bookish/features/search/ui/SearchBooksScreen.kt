@@ -124,7 +124,7 @@ class SearchBooksScreen : Screen {
                             contentAlignment = Alignment.TopCenter
                         ) {
                             Column {
-                                Icon(Icons.Filled.Book, contentDescription = "Open book")
+//                                Icon(Icons.Filled.Book, contentDescription = "Open book")
                                 TextViewBody(
                                     "Type to search for books you're reading",
                                     color = Color.Gray

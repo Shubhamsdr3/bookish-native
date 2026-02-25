@@ -54,10 +54,12 @@ import com.newaura.bookish.core.common.TextViewBody
 import com.newaura.bookish.core.common.TextViewMedium
 import com.newaura.bookish.core.ui.BookDetailCard
 import com.newaura.bookish.core.util.toCamelCase
+import com.newaura.bookish.features.home.HomeScreen
 import com.newaura.bookish.features.post.data.dto.ImageFile
 import com.newaura.bookish.features.post.util.convertFileUriToCoilModel
 import com.newaura.bookish.model.BookDetail
 import com.newaura.bookish.model.PostType
+import kotlinx.coroutines.flow.update
 import org.koin.compose.viewmodel.koinViewModel
 
 class CreatePostScreen(val bookDetail: BookDetail) : Screen {
@@ -71,19 +73,20 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
         val postUiState by viewModel.postUiDataState.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
 
-        val contentDescription = remember { mutableStateOf("") }
         val options = remember { PostType.entries.toList() }
-        var selected by remember { mutableStateOf(0) }
 
         LaunchedEffect(postUiState) {
             when (postUiState) {
                 is CreatePostUiState.Success -> {
-                    navigator.popUntilRoot()
+                    navigator.popUntil { screen ->
+                        screen is HomeScreen
+                    }
                 }
 
                 is CreatePostUiState.NavigateToHome -> {
                     navigator.popUntilRoot()
                 }
+
                 else -> {}
             }
         }
@@ -146,15 +149,27 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                     Spacer(Modifier.height(16.dp))
                     PostTypeSelector(
                         options = options,
-                        selectedIndex = selected,
-                        onSelected = { selected = it }
+                        selectedIndex = viewModel.selectedPostTypeIndex.value,
+                        onSelected = {
+                            viewModel.updateUiState(
+                                postScreenState.copy(
+                                    selectedPostType = options[it]
+                                )
+                            )
+                        }
                     )
                     Spacer(Modifier.height(24.dp))
                     TextViewBody("Your thoughts")
                     Spacer(Modifier.fillMaxWidth().height(16.dp))
                     OutlinedTextField(
-                        value = contentDescription.value,
-                        onValueChange = { contentDescription.value = it },
+                        value = postScreenState.postCaption,
+                        onValueChange = { newCaption ->
+                            viewModel.updateUiState(
+                                viewModel.postScreenState.value.copy(
+                                    postCaption = newCaption
+                                )
+                            )
+                        },
                         placeholder = {
                             TextViewBody(
                                 "What do you think about this book ?",
@@ -183,7 +198,8 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                         GalleryButton(
                             modifier = Modifier.weight(1f),
                             onButtonClicked = {
-                                navigator.push(CaptureImageScreen(
+                                navigator.push(
+                                    CaptureImageScreen(
                                     pickImage = PickImage.FROM_GALLERY,
                                     onGalleryImageResult = { photos ->
                                         viewModel.addGalleryImages(photos)
@@ -216,7 +232,7 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                         ) {
                             items(
                                 items = postScreenState.selectedImages,
-                                key = { imageFile -> "${imageFile.path}-${imageFile.name}".hashCode() }
+                                key = { imageFile -> "${imageFile.path}${imageFile.name}" }
                             ) { imageFile ->
                                 ImageThumbnail(
                                     imageFile = imageFile,
@@ -248,18 +264,17 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                         ) {
                             TextViewBody("Cancel")
                         }
-                        val isEnabled = contentDescription.value.isNotEmpty() &&
+                        val isEnabled = postScreenState.postCaption.isNotEmpty() &&
                                 postUiState != CreatePostUiState.Loading
                         Button(
                             enabled = isEnabled,
                             onClick = {
                                 viewModel.updateUiState(
                                     postScreenState.copy(
-                                        postCaption = contentDescription.value,
                                         bookTitle = postScreenState.selectedBook?.volumeInfo?.title
                                             ?: "",
-                                        selectedPostType = options[selected],
-                                        selectedBook = bookDetail
+                                        selectedPostType = options[viewModel.selectedPostTypeIndex.value],
+                                        selectedBook = bookDetail,
                                     )
                                 )
                                 viewModel.createPost()
@@ -308,7 +323,9 @@ fun ImageThumbnail(
                     color = Color.Black.copy(alpha = 0.6f),
                     shape = RoundedCornerShape(4.dp)
                 )
-                .clickable(indication = ripple(radius = 14.dp), interactionSource = remember { MutableInteractionSource() }) {
+                .clickable(
+                    indication = ripple(radius = 14.dp),
+                    interactionSource = remember { MutableInteractionSource() }) {
                     onRemove()
                 },
             contentAlignment = Alignment.Center
@@ -335,7 +352,7 @@ fun PostTypeSelector(
             Button(
                 onClick = { onSelected(i) },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSelected) Color.Blue else Color.LightGray,
+                    containerColor = if (isSelected) Color(0xFF6200EE) else Color.LightGray,
                     contentColor = if (isSelected) Color.White else Color.Black
                 ),
                 shape = RoundedCornerShape(10.dp),
@@ -380,7 +397,6 @@ fun CameraButton(
     modifier: Modifier = Modifier,
     onButtonClicked: () -> Unit
 ) {
-
     Button(
         onClick = onButtonClicked,
         colors = ButtonDefaults.buttonColors(
