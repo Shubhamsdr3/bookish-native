@@ -3,6 +3,7 @@ package com.newaura.bookish.features.post.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.newaura.bookish.core.domain.UserDataStore
+import com.newaura.bookish.features.post.data.ImageUploadRepository
 import com.newaura.bookish.features.post.data.dto.CreatePostRequest
 import com.newaura.bookish.features.post.data.dto.ImageFile
 import com.newaura.bookish.features.post.data.dto.PostData
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 
 class CreatePostViewModel(
     private val createPostUseCase: CreatePostUseCase,
-    private val userDataStore: UserDataStore
+    private val userDataStore: UserDataStore,
+    private val imageUploadRepository: ImageUploadRepository
 ) : ViewModel() {
 
     private val _postScreenState = MutableStateFlow(CreatePostScreenState())
@@ -32,12 +34,9 @@ class CreatePostViewModel(
     }
 
     fun addGalleryImages(photos: List<GalleryPhotoResult>) {
-        println("🖼️ addGalleryImages called with ${photos.size} photos")
         val images = photos.map { ImageFileMapper.mapGalleryPhotoToImageFile(it) }
-        println("📸 Mapped to ${images.size} ImageFile objects")
         _postScreenState.update { currentState ->
             val newImages = currentState.selectedImages + images
-            println("📱 Updated state: previous=${currentState.selectedImages.size}, added=${images.size}, total=${newImages.size}")
             currentState.copy(
                 selectedImages = newImages
             )
@@ -45,11 +44,9 @@ class CreatePostViewModel(
     }
 
     fun addCameraImage(photo: PhotoResult) {
-        println("📷 addCameraImage called with 1 photo")
         val image = ImageFileMapper.mapPhotoToImageFile(photo)
         _postScreenState.update { currentState ->
             val newImages = currentState.selectedImages + image
-            println("📱 Updated state: previous=${currentState.selectedImages.size}, added=1, total=${newImages.size}")
             currentState.copy(
                 selectedImages = newImages
             )
@@ -85,9 +82,19 @@ class CreatePostViewModel(
             _postUiDataState.value = CreatePostUiState.Loading
 
             try {
-                val uploadedImageUrls = _postScreenState.value.selectedImages.map { imageFile ->
-                    uploadImageFile(imageFile)
+                println("🚀 Starting post creation process...")
+
+                // Upload images to Firebase Storage
+                val selectedImages = _postScreenState.value.selectedImages
+                val uploadedImageUrls = if (selectedImages.isNotEmpty()) {
+                    println("📤 Uploading ${selectedImages.size} image(s) to Firebase Storage...")
+                    uploadImagesToFirebase(selectedImages)
+                } else {
+                    emptyList()
                 }
+
+                println("✅ All images uploaded successfully")
+                println("📝 Uploaded URLs: $uploadedImageUrls")
 
                 val bookCategories =
                     _postScreenState.value.selectedBook?.volumeInfo?.categories?.map { it }
@@ -107,30 +114,54 @@ class CreatePostViewModel(
                     )
                 )
 
+                println("🌐 Sending post request to backend...")
                 createPostUseCase.invoke(requestBody).collect { result ->
                     result.onSuccess {
+                        println("✅ Post created successfully!")
                         _postUiDataState.value =
                             CreatePostUiState.Success("Post created successfully")
                         clearForm()
                     }
                     result.onFailure { exception ->
+                        println("❌ Post creation failed: ${exception.message}")
                         handleError(exception)
                     }
                 }
             } catch (exception: Exception) {
+                println("❌ Error during post creation: ${exception.message}")
+                exception.printStackTrace()
                 handleError(exception)
             }
         }
     }
 
-    private fun uploadImageFile(imageFile: ImageFile): String {
+    /**
+     * Upload images to Firebase Storage
+     * @param imageFiles List of images to upload
+     * @return List of download URLs from Firebase
+     * @throws Exception if upload fails
+     */
+    private suspend fun uploadImagesToFirebase(imageFiles: List<ImageFile>): List<String> {
         return try {
-            // TODO: Implement Firebase Storage upload
-            imageFile.path
+            val uploadedUrls = mutableListOf<String>()
+            imageUploadRepository.uploadImages(imageFiles).collect { result ->
+                result.onSuccess { urls ->
+                    println("☁️  Firebase upload successful - ${urls.size} images uploaded")
+                    uploadedUrls.addAll(urls)
+                }.onFailure { exception ->
+                    println("❌ Firebase upload failed: ${exception.message}")
+                    throw exception
+                }
+            }
+
+            uploadedUrls
         } catch (exception: Exception) {
-            throw Exception("Error uploading image: ${exception.message}")
+            println("❌ Image upload error: ${exception.message}")
+            exception.printStackTrace()
+            throw Exception("Failed to upload images: ${exception.message}")
         }
     }
+
 
     private fun handleError(exception: Throwable) {
         val errorMessage = when {

@@ -58,7 +58,7 @@ import com.newaura.bookish.features.post.data.dto.ImageFile
 import com.newaura.bookish.features.post.util.convertFileUriToCoilModel
 import com.newaura.bookish.model.BookDetail
 import com.newaura.bookish.model.PostType
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 class CreatePostScreen(val bookDetail: BookDetail) : Screen {
 
@@ -66,13 +66,13 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
     @Composable
     override fun Content() {
 
-        val viewModel = koinInject<CreatePostViewModel>()
+        val viewModel: CreatePostViewModel = koinViewModel()
         val postScreenState by viewModel.postScreenState.collectAsState()
         val postUiState by viewModel.postUiDataState.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
 
         val contentDescription = remember { mutableStateOf("") }
-        val options = PostType.entries.toList()
+        val options = remember { PostType.entries.toList() }
         var selected by remember { mutableStateOf(0) }
 
         LaunchedEffect(postUiState) {
@@ -86,12 +86,6 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                 }
                 else -> {}
             }
-        }
-
-        // Force recomposition when selectedImages changes
-        LaunchedEffect(postScreenState.selectedImages.size) {
-            val imageSize = postScreenState.selectedImages.size
-            println("Shubham ==> ${imageSize}")
         }
 
         Scaffold(
@@ -188,20 +182,33 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                     ) {
                         GalleryButton(
                             modifier = Modifier.weight(1f),
-                            viewModel = viewModel,
-                            navigator = navigator
+                            onButtonClicked = {
+                                navigator.push(CaptureImageScreen(
+                                    pickImage = PickImage.FROM_GALLERY,
+                                    onGalleryImageResult = { photos ->
+                                        viewModel.addGalleryImages(photos)
+                                    }
+                                ))
+                            }
                         )
                         CameraButton(
                             modifier = Modifier.weight(1f),
-                            viewModel = viewModel,
-                            navigator = navigator
+                            onButtonClicked = {
+                                navigator.push(
+                                    CaptureImageScreen(
+                                        PickImage.FROM_CAMERA,
+                                        onCameraImageResult = { photo ->
+                                            viewModel.addCameraImage(photo)
+                                        },
+                                    )
+                                )
+                            }
                         )
                     }
 
                     TextViewBody("Selected images (${postScreenState.selectedImages.size})")
                     Spacer(Modifier.height(12.dp))
 
-                    // Use a key to force recomposition when list changes
                     Box(modifier = Modifier.fillMaxWidth()) {
                         LazyRow(
                             modifier = Modifier.fillMaxWidth(),
@@ -293,7 +300,6 @@ fun ImageThumbnail(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-        // Remove button overlay
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -348,37 +354,10 @@ fun PostTypeSelector(
 @Composable
 fun GalleryButton(
     modifier: Modifier = Modifier,
-    viewModel: CreatePostViewModel,
-    navigator: cafe.adriel.voyager.navigator.Navigator
+    onButtonClicked: () -> Unit
 ) {
-    var shouldPopScreen by remember { mutableStateOf(false) }
-
-    if (shouldPopScreen) {
-        LaunchedEffect(Unit) {
-            navigator.pop()
-            shouldPopScreen = false
-        }
-    }
-
     Button(
-        onClick = {
-            println("🔘 Gallery button clicked")
-            navigator.push(
-                CaptureImageScreen(
-                    pickImage = PickImage.FROM_GALLERY,
-                    onGalleryImageResult = { photos ->
-                        println("✅ Gallery callback invoked with ${photos.size} photos")
-                        viewModel.addGalleryImages(photos)
-                        println("✅ ViewModel.addGalleryImages() called")
-                        shouldPopScreen = true
-                    },
-                    onDismiss = {
-                        println("❌ Gallery dismiss callback invoked")
-                        navigator.pop()
-                    }
-                )
-            )
-        },
+        onClick = onButtonClicked,
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF6200EE),
             contentColor = Color.White
@@ -399,39 +378,11 @@ fun GalleryButton(
 @Composable
 fun CameraButton(
     modifier: Modifier = Modifier,
-    viewModel: CreatePostViewModel,
-    navigator: cafe.adriel.voyager.navigator.Navigator
+    onButtonClicked: () -> Unit
 ) {
-    var shouldPopScreen by remember { mutableStateOf(false) }
-
-    if (shouldPopScreen) {
-        LaunchedEffect(Unit) {
-            navigator.pop()
-            shouldPopScreen = false
-        }
-    }
 
     Button(
-        onClick = {
-            println("🔘 Camera button clicked")
-            navigator.push(
-                CaptureImageScreen(
-                    PickImage.FROM_CAMERA,
-                    onCameraImageResult = { photos ->
-                        println("✅ Camera callback invoked with ${photos.size} photos")
-                        photos.forEach { photo ->
-                            println("📷 Processing camera photo: ${photo.fileName}")
-                            viewModel.addCameraImage(photo)
-                        }
-                        shouldPopScreen = true
-                    },
-                    onDismiss = {
-                        println("❌ Camera dismiss callback invoked")
-                        navigator.pop()
-                    }
-                )
-            )
-        },
+        onClick = onButtonClicked,
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF03DAC6),
             contentColor = Color.Black

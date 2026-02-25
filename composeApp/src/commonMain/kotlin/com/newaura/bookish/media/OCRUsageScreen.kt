@@ -106,7 +106,7 @@ fun OCRUsageScreen(
                                 baseUrl = "http://localhost:8080/api/ocr",
                                 apiKey = null, // no API key
                                 requestFormat = RequestFormat.JSON_URL
-                            )
+                            ).
                         ),
 
                         onOCRCompleted = { result ->

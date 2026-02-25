@@ -1,6 +1,7 @@
 package com.newaura.bookish
 
 import android.app.Application
+import com.newaura.bookish.features.post.di.firebaseStorageModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 
@@ -11,7 +12,7 @@ class BookishApp : Application() {
         initKoin(this) {
             androidContext(this@BookishApp)
             androidLogger()
-            modules()
+            modules(firebaseStorageModule)
         }
     }
 }

@@ -17,19 +17,11 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.newaura.bookish.core.common.EndSliderGradientBg
 import com.newaura.bookish.core.common.StartSliderGradientBg
-import com.newaura.bookish.core.domain.AppDataStoreRepository
-import com.newaura.bookish.core.domain.DataStoreKeys
-import com.newaura.bookish.core.domain.UserState
-import com.newaura.bookish.core.ui.WebViewScreen
 import com.newaura.bookish.features.auth.LoginScreen
 import com.newaura.bookish.features.feed.AuthState
-import com.newaura.bookish.features.feed.BookishApiService
 import com.newaura.bookish.features.home.HomeScreen
-import com.newaura.bookish.features.post.ui.CreatePostScreen
 import com.newaura.bookish.widgets.GradientBox
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 class SplashScreen : Screen {

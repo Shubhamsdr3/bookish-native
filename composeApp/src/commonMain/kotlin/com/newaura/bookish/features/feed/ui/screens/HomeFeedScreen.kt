@@ -53,7 +53,6 @@ import com.newaura.bookish.features.feed.ui.HomeFeedScreenState
 import com.newaura.bookish.features.feed.ui.HomeFeedUiState
 import com.newaura.bookish.features.feed.ui.HomeFeedViewModel
 import com.newaura.bookish.features.mybooks.MyBookScreen
-import com.newaura.bookish.features.post.ui.CreatePostScreen
 import com.newaura.bookish.features.search.ui.SearchBooksScreen
 import com.newaura.bookish.model.FeedData
 import org.koin.compose.viewmodel.koinViewModel
