@@ -1,9 +1,5 @@
 package com.newaura.bookish.features.post.ui
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.newaura.bookish.core.domain.UserDataStore
@@ -13,6 +9,7 @@ import com.newaura.bookish.features.post.data.dto.CreatePostRequest
 import com.newaura.bookish.features.post.data.dto.ImageFile
 import com.newaura.bookish.features.post.data.dto.PostData
 import com.newaura.bookish.features.post.domain.CreatePostUseCase
+import com.newaura.bookish.features.post.domain.UploadState
 import com.newaura.bookish.features.post.domain.model.ImageFileMapper
 import io.github.ismoy.imagepickerkmp.domain.models.GalleryPhotoResult
 import io.github.ismoy.imagepickerkmp.domain.models.PhotoResult
@@ -34,11 +31,10 @@ class CreatePostViewModel(
     private val _postUiDataState = MutableStateFlow<CreatePostUiState>(CreatePostUiState.Idle)
     val postUiDataState: StateFlow<CreatePostUiState> = _postUiDataState.asStateFlow()
 
-    private val _selectedPostTypeIndex = MutableStateFlow(0)
-    val selectedPostTypeIndex: StateFlow<Int> = _selectedPostTypeIndex.asStateFlow()
+    private val _uploadState = MutableStateFlow<UploadState>(UploadState.Idle)
+    val uploadState: StateFlow<UploadState> = _uploadState.asStateFlow()
 
     fun updateUiState(postScreenState: CreatePostScreenState) {
-        _selectedPostTypeIndex.update { postScreenState.selectedPostType.ordinal }
         _postScreenState.update { postScreenState }
     }
 
@@ -91,14 +87,73 @@ class CreatePostViewModel(
             _postUiDataState.value = CreatePostUiState.Loading
 
             try {
-                // Upload images to Firebase Storage
+                // Upload images using WorkManager in background
                 val selectedImages = _postScreenState.value.selectedImages
-                val uploadedImageUrls = if (selectedImages.isNotEmpty()) {
-                    uploadImagesToFirebase(selectedImages)
+                if (selectedImages.isNotEmpty()) {
+                    uploadImagesInBackground(selectedImages, userId)
                 } else {
-                    emptyList()
+                    // No images, create post immediately
+                    createPostWithUrls(userId, emptyList())
                 }
+            } catch (exception: Exception) {
+                AppLogger.e(exception)
+                exception.printStackTrace()
+                handleError(exception)
+            }
+        }
+    }
 
+    /**
+     * Schedule images for background upload using WorkManager
+     * @param imageFiles List of images to upload
+     * @param userId User ID for post creation
+     */
+    private fun uploadImagesInBackground(imageFiles: List<ImageFile>, userId: String) {
+        val imagePaths = imageFiles.map { it.path }
+        val workTag = "post_${System.currentTimeMillis()}"
+
+        AppLogger.d("🚀 Scheduling background upload for ${imagePaths.size} images")
+
+        // Schedule the upload work
+        imageUploadRepository.scheduleBackgroundUpload(imagePaths, workTag)
+
+        // Observe upload state
+        viewModelScope.launch {
+            imageUploadRepository.observeUploadState(workTag).collect { state ->
+                _uploadState.value = state
+
+                when (state) {
+                    is UploadState.Success -> {
+                        AppLogger.d("✅ Upload complete with ${state.uploadedUrls.size} URLs")
+                        createPostWithUrls(userId, state.uploadedUrls)
+                    }
+
+                    is UploadState.Error -> {
+                        AppLogger.e("❌ Upload error: ${state.exception.message}")
+                        handleError(state.exception)
+                    }
+
+                    is UploadState.Loading -> {
+                        AppLogger.d("⏳ Upload in progress...")
+                        _postUiDataState.value = CreatePostUiState.Loading
+                    }
+
+                    UploadState.Idle -> {
+                        AppLogger.d("Idle state")
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Create post with uploaded image URLs
+     * @param userId User ID
+     * @param uploadedImageUrls List of uploaded image URLs
+     */
+    private fun createPostWithUrls(userId: String, uploadedImageUrls: List<String>) {
+        viewModelScope.launch {
+            try {
                 val bookCategories =
                     _postScreenState.value.selectedBook?.volumeInfo?.categories?.map { it }
                         ?: emptyList()
@@ -135,31 +190,6 @@ class CreatePostViewModel(
         }
     }
 
-    /**
-     * Upload images to Firebase Storage
-     * @param imageFiles List of images to upload
-     * @return List of download URLs from Firebase
-     * @throws Exception if upload fails
-     */
-    private suspend fun uploadImagesToFirebase(imageFiles: List<ImageFile>): List<String> {
-        return try {
-            val uploadedUrls = mutableListOf<String>()
-            imageUploadRepository.uploadImages(imageFiles).collect { result ->
-                result.onSuccess { urls ->
-                    uploadedUrls.addAll(urls)
-                }.onFailure { exception ->
-                    AppLogger.e(exception)
-                    throw exception
-                }
-            }
-
-            uploadedUrls
-        } catch (exception: Exception) {
-            AppLogger.e(exception)
-            exception.printStackTrace()
-            throw Exception("Failed to upload images: ${exception.message}")
-        }
-    }
 
     private fun handleError(exception: Throwable) {
         val errorMessage = when {

@@ -19,7 +19,7 @@ data class CreatePostScreenState(
     val postCaption: String = "",
     val bookTitle: String = "",
     val bookLink: String = "",
-    val selectedPostType: PostType = PostType.REVIEW,
+    val selectedPostType: PostType = PostType.THOUGHT,
     val selectedImages: List<ImageFile> = emptyList(),
     val selectedBook: BookDetail? = null,
 )

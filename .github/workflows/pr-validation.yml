@@ -33,8 +33,8 @@ jobs:
           echo "🔍 Validating commits added to ${{ github.event.pull_request.base.ref }}..."
           ERROR=0
           COMMITS=$(git log origin/${{ github.event.pull_request.base.ref }}..HEAD --pretty=format:"%s")
-
-          while read -r COMMIT_MSG; do
+          
+          while IFS= read -r COMMIT_MSG; do
             validate_message "commit message" "$COMMIT_MSG" || ERROR=1
           done <<< "$COMMITS"
 

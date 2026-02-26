@@ -10,6 +10,7 @@ androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.9.6"
 composeHotReload = "1.0.0"
 composeMultiplatform = "1.10.1"
+compressor = "3.0.1"
 junit = "4.13.2"
 kotlin = "2.3.10"
 kotlinx-coroutines = "1.10.2"
@@ -17,7 +18,7 @@ ktor = "3.4.0"
 androidx-datastore = "1.2.0"
 koin = "4.1.1"
 coil_version = '3.3.0'
-compose = "1.10.3"
+compose = "1.10.4"
 cmp-version = "1.7.3"
 voyager = "1.1.0-beta03"
 firebase-auth = "24.0.1"
@@ -27,8 +28,10 @@ firebase-gitlive = "2.4.0"
 datastoreCore = "1.2.0"
 kotlin-datetime = "0.7.1"
 imagepickerkmp = "1.0.32"
+workmanager = "2.11.1"
 
 [libraries]
+compressor = { module = "id.zelory:compressor", version.ref = "compressor" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
@@ -80,7 +83,7 @@ firebase-storage = { module = "com.google.firebase:firebase-storage", version.re
 firebase-gitlive = { module = "dev.gitlive:firebase-auth", version.ref = "firebase-gitlive" }
 androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastoreCore" }
 imagepickerkmp = { module = "io.github.ismoy:imagepickerkmp", version.ref = "imagepickerkmp" }
-
+androidx-workmanager = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workmanager" }
 
 [bundles]
 compose = [

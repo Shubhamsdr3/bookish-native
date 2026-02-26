@@ -11,11 +11,10 @@ import org.koin.dsl.module
 val createPostModule = module {
     factory { CreatePostUseCase(get()) }
 
-    // Image Upload Repository with both Firebase Storage and ImageUploadManager
     factory<ImageUploadRepository> {
         ImageUploadRepositoryImpl(
-            uploadManager = get(),  // FirebaseStorageService
-            uploadWorkManager = get<ImageUploadManager>()  // Platform-specific ImageUploadManager
+            uploadManager = get(),
+            uploadWorkManager = get<ImageUploadManager>()
         )
     }
 
