@@ -54,12 +54,10 @@ import com.newaura.bookish.core.common.TextViewBody
 import com.newaura.bookish.core.common.TextViewMedium
 import com.newaura.bookish.core.ui.BookDetailCard
 import com.newaura.bookish.core.util.toCamelCase
-import com.newaura.bookish.features.home.HomeScreen
 import com.newaura.bookish.features.post.data.dto.ImageFile
 import com.newaura.bookish.features.post.util.convertFileUriToCoilModel
 import com.newaura.bookish.model.BookDetail
 import com.newaura.bookish.model.PostType
-import kotlinx.coroutines.flow.update
 import org.koin.compose.viewmodel.koinViewModel
 
 class CreatePostScreen(val bookDetail: BookDetail) : Screen {
@@ -74,19 +72,17 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
         val navigator = LocalNavigator.currentOrThrow
 
         val options = remember { PostType.entries.toList() }
+        var selected by remember { mutableStateOf(0) }
 
         LaunchedEffect(postUiState) {
             when (postUiState) {
                 is CreatePostUiState.Success -> {
-                    navigator.popUntil { screen ->
-                        screen is HomeScreen
-                    }
+                    navigator.popUntilRoot()
                 }
 
                 is CreatePostUiState.NavigateToHome -> {
                     navigator.popUntilRoot()
                 }
-
                 else -> {}
             }
         }
@@ -149,14 +145,8 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                     Spacer(Modifier.height(16.dp))
                     PostTypeSelector(
                         options = options,
-                        selectedIndex = viewModel.selectedPostTypeIndex.value,
-                        onSelected = {
-                            viewModel.updateUiState(
-                                postScreenState.copy(
-                                    selectedPostType = options[it]
-                                )
-                            )
-                        }
+                        selectedIndex = selected,
+                        onSelected = { selected = it }
                     )
                     Spacer(Modifier.height(24.dp))
                     TextViewBody("Your thoughts")
@@ -164,11 +154,7 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                     OutlinedTextField(
                         value = postScreenState.postCaption,
                         onValueChange = { newCaption ->
-                            viewModel.updateUiState(
-                                viewModel.postScreenState.value.copy(
-                                    postCaption = newCaption
-                                )
-                            )
+                            viewModel.updatePostCaption(newCaption)
                         },
                         placeholder = {
                             TextViewBody(
@@ -198,8 +184,7 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                         GalleryButton(
                             modifier = Modifier.weight(1f),
                             onButtonClicked = {
-                                navigator.push(
-                                    CaptureImageScreen(
+                                navigator.push(CaptureImageScreen(
                                     pickImage = PickImage.FROM_GALLERY,
                                     onGalleryImageResult = { photos ->
                                         viewModel.addGalleryImages(photos)
@@ -273,8 +258,8 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                                     postScreenState.copy(
                                         bookTitle = postScreenState.selectedBook?.volumeInfo?.title
                                             ?: "",
-                                        selectedPostType = options[viewModel.selectedPostTypeIndex.value],
-                                        selectedBook = bookDetail,
+                                        selectedPostType = options[selected],
+                                        selectedBook = bookDetail
                                     )
                                 )
                                 viewModel.createPost()
@@ -323,8 +308,7 @@ fun ImageThumbnail(
                     color = Color.Black.copy(alpha = 0.6f),
                     shape = RoundedCornerShape(4.dp)
                 )
-                .clickable(
-                    indication = ripple(radius = 14.dp),
+                .clickable(indication = ripple(radius = 14.dp),
                     interactionSource = remember { MutableInteractionSource() }) {
                     onRemove()
                 },

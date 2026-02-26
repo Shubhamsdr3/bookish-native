@@ -63,6 +63,8 @@ kotlin {
 
             implementation(libs.androidx.datastore.datastore)
             implementation(libs.androidx.datastore.preferences)
+            implementation(libs.androidx.workmanager)
+            implementation(libs.compressor) // For image compression
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
