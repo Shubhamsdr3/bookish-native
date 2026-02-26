@@ -1,0 +1,47 @@
+name: Commit & PR Title Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch (shallow clone)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # Only fetch current PR branch
+
+      - name: Fetch base branch (only)
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+
+      - name: Validate PR title and commit messages
+        run: |
+          #!/bin/bash
+          set -e
+
+          # Load validation script
+          source ./scripts/validate-git-message.sh
+
+          echo "🔍 Validating PR title..."
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          validate_message "PR title" "$PR_TITLE" || exit 1
+
+          echo ""
+          echo "🔍 Validating commits added to ${{ github.event.pull_request.base.ref }}..."
+          ERROR=0
+          COMMITS=$(git log origin/${{ github.event.pull_request.base.ref }}..HEAD --pretty=format:"%s")
+
+          while read -r COMMIT_MSG; do
+            validate_message "commit message" "$COMMIT_MSG" || ERROR=1
+          done <<< "$COMMITS"
+
+          if [ "$ERROR" -ne 0 ]; then
+            echo ""
+            echo "🚫 One or more commit messages are invalid."
+            exit 1
+          fi
+
+          echo "✅ All validations passed!"
