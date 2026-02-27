@@ -1,6 +1,6 @@
 package com.newaura.bookish.features.auth.di
 
-import com.newaura.bookish.core.Context
+import com.newaura.bookish.core.ApplicationContext
 import com.newaura.bookish.features.auth.data.AuthRepositoryImpl
 import com.newaura.bookish.features.auth.domain.AuthRepository
 import com.newaura.bookish.features.auth.domain.PhoneAuthService
@@ -25,4 +25,4 @@ val authDomainModule = module {
     factory { LoginUserUseCase(get<AuthRepository>()) }
 }
 
-expect fun createAuthService(context: Context): PhoneAuthService
+expect fun createAuthService(context: ApplicationContext): PhoneAuthService

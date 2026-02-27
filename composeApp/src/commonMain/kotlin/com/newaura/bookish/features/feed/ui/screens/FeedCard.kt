@@ -221,22 +221,25 @@ fun ImageCarousel(images: List<String>?) {
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            repeat(images.size) { index ->
-                Surface(
-                    modifier = Modifier
-                        .size(if (pagerState.currentPage == index) 6.dp else 4.dp)
-                        .clip(CircleShape),
-                    color = if (pagerState.currentPage == index)
-                        Color.Black else Color.Gray.copy(alpha = 0.3f)
-                ) {}
-                if (index < images.size - 1) {
-                    Spacer(modifier = Modifier.width(6.dp))
+
+        if (images.size > 1) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(images.size) { index ->
+                    Surface(
+                        modifier = Modifier
+                            .size(if (pagerState.currentPage == index) 6.dp else 4.dp)
+                            .clip(CircleShape),
+                        color = if (pagerState.currentPage == index)
+                            Color.Black else Color.Gray.copy(alpha = 0.3f)
+                    ) {}
+                    if (index < images.size - 1) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
                 }
             }
         }

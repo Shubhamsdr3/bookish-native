@@ -16,11 +16,11 @@ sealed class UploadState {
 interface ImageUploadManager {
     /**
      * Schedule image upload with background processing
-     * @param imagePaths List of image file paths to upload
+     * @param imageUriList List of image uris.
      * @param workTag Tag to identify the work
      * @return Work ID for tracking
      */
-    fun scheduleImageUpload(imagePaths: List<String>, workTag: String = "image_upload"): String
+    fun scheduleImageUpload(imageUriList: List<String>, workTag: String = "image_upload"): String
 
     /**
      * Observe upload state changes

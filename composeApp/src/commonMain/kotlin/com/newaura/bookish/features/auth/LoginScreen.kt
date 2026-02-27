@@ -17,9 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,7 +35,6 @@ import com.newaura.bookish.core.getActivityContext
 import com.newaura.bookish.features.OtpVerificationScreen
 import com.newaura.bookish.features.feed.ui.LoginUiState
 import com.newaura.bookish.features.feed.ui.LoginViewModel
-import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 

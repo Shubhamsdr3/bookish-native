@@ -10,18 +10,18 @@ import kotlinx.coroutines.flow.Flow
 interface FirebaseStorageService {
     /**
      * Upload an image file to Firebase Storage
-     * @param imageFile The image file to upload
+     * @param imageUri The image file to upload
      * @return Flow emitting the download URL when upload completes
      * @throws Exception if upload fails
      */
-    suspend fun uploadImage(imageFile: ImageFile): Flow<Result<String>>
+    suspend fun uploadImage(imageUri: String): Flow<Result<String>>
 
     /**
      * Upload multiple images to Firebase Storage
-     * @param imageFiles List of image files to upload
+     * @param imageUris List of image files to upload
      * @return Flow emitting the list of download URLs
      */
-    suspend fun uploadImages(imageFiles: List<ImageFile>): Flow<Result<List<String>>>
+    suspend fun uploadImages(imageUris: List<String>): Flow<Result<List<String>>>
 
     /**
      * Delete an image from Firebase Storage
