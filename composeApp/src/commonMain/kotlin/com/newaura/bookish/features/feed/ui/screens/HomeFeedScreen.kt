@@ -52,7 +52,7 @@ import com.newaura.bookish.core.common.TextViewMedium
 import com.newaura.bookish.features.feed.ui.HomeFeedScreenState
 import com.newaura.bookish.features.feed.ui.HomeFeedUiState
 import com.newaura.bookish.features.feed.ui.HomeFeedViewModel
-import com.newaura.bookish.features.mybooks.MyBookScreen
+import com.newaura.bookish.features.bookdetail.ui.MyBookScreen
 import com.newaura.bookish.features.search.ui.SearchBooksScreen
 import com.newaura.bookish.model.FeedData
 import org.koin.compose.viewmodel.koinViewModel
@@ -217,8 +217,7 @@ private fun HomeFeedContent(
                             feedData = feed,
                             onClick = { onFeedClick(feed) },
                             onBookNameClick = { _ ->
-                                // Navigate to book detail.
-                                navigator.push(MyBookScreen())
+                                navigator.push(MyBookScreen(feed.post?.bookId ?: ""))
                             }
                         )
                     }

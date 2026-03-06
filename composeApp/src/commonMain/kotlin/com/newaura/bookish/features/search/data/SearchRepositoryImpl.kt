@@ -18,7 +18,7 @@ class SearchRepositoryImpl(private val bookApiService: BookishApiService): ISear
             if (response != null && response.data != null) {
                 emit(Result.success(response.data!!))
             } else {
-                val errorMessage = response?.message ?: "Something went wrong"
+                val errorMessage = response?.errorMessage ?: "Something went wrong"
                 emit(Result.failure(Exception(errorMessage)))
             }
         } catch (e: Exception) {

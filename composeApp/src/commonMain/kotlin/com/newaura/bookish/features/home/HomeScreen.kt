@@ -20,10 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen
-import com.newaura.bookish.features.mybooks.MyBookScreen
+import com.newaura.bookish.features.bookdetail.ui.MyBookScreen
+import com.newaura.bookish.features.library.LibraryScreen
 import com.newaura.bookish.features.profile.ProfileScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,7 +46,7 @@ class HomeScreen : Screen {
             ) {
                 when (selectedItem.value) {
                     0 -> HomeFeedScreen().Content()
-                    1 -> MyBookScreen().Content()
+                    1 -> LibraryScreen().Content()
                     2 -> ProfileScreen().Content()
                     else -> HomeFeedScreen().Content()
                 }

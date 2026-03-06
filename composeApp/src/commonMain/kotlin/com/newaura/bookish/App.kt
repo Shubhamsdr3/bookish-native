@@ -20,6 +20,7 @@ import com.newaura.bookish.features.feed.UserRepository
 import com.newaura.bookish.features.feed.di.commonModule
 import com.newaura.bookish.features.feed.di.feedDataModule
 import com.newaura.bookish.features.home.di.homePresentationModule
+import com.newaura.bookish.features.bookdetail.di.bookDetailModule
 import com.newaura.bookish.features.post.di.createPostModule
 import com.newaura.bookish.features.post.domain.FilePicker
 import com.newaura.bookish.features.post.ui.FilePickerImpl
@@ -61,6 +62,7 @@ fun initKoin(context: ApplicationContext, config: KoinAppDeclaration? = null) {
 
         modules(
             commonModule,
+            bookDetailModule,
             dataStoreModule,
             userDataStore,
             homePresentationModule,
