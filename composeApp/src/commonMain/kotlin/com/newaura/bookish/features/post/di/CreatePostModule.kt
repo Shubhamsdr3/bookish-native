@@ -1,8 +1,8 @@
 package com.newaura.bookish.features.post.di
 
 import com.newaura.bookish.core.domain.UserDataStore
-import com.newaura.bookish.features.post.data.ImageUploadRepository
-import com.newaura.bookish.features.post.data.ImageUploadRepositoryImpl
+import com.newaura.bookish.features.post.data.dto.ImageUploadRepositoryImpl
+import com.newaura.bookish.features.post.domain.ImageUploadRepository
 import com.newaura.bookish.features.post.ui.CreatePostViewModel
 import com.newaura.bookish.features.post.domain.CreatePostUseCase
 import com.newaura.bookish.features.post.domain.ImageUploadManager

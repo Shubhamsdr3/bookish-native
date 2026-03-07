@@ -8,7 +8,7 @@ import io.github.ismoy.imagepickerkmp.domain.models.PhotoResult
 object ImageFileMapper {
     fun mapGalleryPhotoToImageFile(galleryPhoto: GalleryPhotoResult): ImageFile {
         return ImageFile(
-            path = galleryPhoto.uri,
+            contentUri = galleryPhoto.uri,
             name = galleryPhoto.fileName ?: "",
             mimeType = galleryPhoto.mimeType ?: "image/*",
             fileSize = galleryPhoto.fileSize ?: 0L,
@@ -18,7 +18,7 @@ object ImageFileMapper {
 
     fun mapPhotoToImageFile(photo: PhotoResult): ImageFile {
         return ImageFile(
-            path = photo.uri,
+            contentUri = photo.uri,
             name = photo.fileName ?: "camera_image",
             mimeType = photo.mimeType ?: "image/*",
             fileSize = photo.fileSize ?: 0L,

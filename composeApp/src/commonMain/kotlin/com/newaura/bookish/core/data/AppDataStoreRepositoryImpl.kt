@@ -1,11 +1,11 @@
 package com.newaura.bookish.core.data
 
-import com.newaura.bookish.core.Context
+import com.newaura.bookish.core.ApplicationContext
 import com.newaura.bookish.core.domain.AppDataStoreRepository
 
 const val APP_DATASTORE = "com.newaura.bookish"
 
-class AppDataStoreRepositoryManager(val context: Context?) : AppDataStoreRepository {
+class AppDataStoreRepositoryManager(val context: ApplicationContext?) : AppDataStoreRepository {
 
     override suspend fun setValue(
         key: String,
@@ -21,6 +21,6 @@ class AppDataStoreRepositoryManager(val context: Context?) : AppDataStoreReposit
     }
 }
 
-expect suspend fun Context?.putData(key: String, `object`: String)
+expect suspend fun ApplicationContext?.putData(key: String, `object`: String)
 
-expect suspend fun Context?.getData(key: String): String?
+expect suspend fun ApplicationContext?.getData(key: String): String?

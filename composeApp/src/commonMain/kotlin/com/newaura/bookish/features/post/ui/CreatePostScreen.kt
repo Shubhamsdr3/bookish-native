@@ -83,6 +83,7 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                 is CreatePostUiState.NavigateToHome -> {
                     navigator.popUntilRoot()
                 }
+
                 else -> {}
             }
         }
@@ -154,7 +155,11 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                     OutlinedTextField(
                         value = postScreenState.postCaption,
                         onValueChange = { newCaption ->
-                            viewModel.updatePostCaption(newCaption)
+                            viewModel.updateUiState(
+                                postScreenState.copy(
+                                    postCaption = newCaption
+                                )
+                            )
                         },
                         placeholder = {
                             TextViewBody(
@@ -184,7 +189,8 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                         GalleryButton(
                             modifier = Modifier.weight(1f),
                             onButtonClicked = {
-                                navigator.push(CaptureImageScreen(
+                                navigator.push(
+                                    CaptureImageScreen(
                                     pickImage = PickImage.FROM_GALLERY,
                                     onGalleryImageResult = { photos ->
                                         viewModel.addGalleryImages(photos)
@@ -217,7 +223,7 @@ class CreatePostScreen(val bookDetail: BookDetail) : Screen {
                         ) {
                             items(
                                 items = postScreenState.selectedImages,
-                                key = { imageFile -> "${imageFile.path}${imageFile.name}" }
+                                key = { imageFile -> "${imageFile.contentUri}${imageFile.name}" }
                             ) { imageFile ->
                                 ImageThumbnail(
                                     imageFile = imageFile,
@@ -286,7 +292,7 @@ fun ImageThumbnail(
     imageFile: ImageFile,
     onRemove: () -> Unit
 ) {
-    val modelForCoil = convertFileUriToCoilModel(imageFile.path)
+    val modelForCoil = convertFileUriToCoilModel(imageFile.contentUri)
 
     Box(
         modifier = Modifier
@@ -308,7 +314,8 @@ fun ImageThumbnail(
                     color = Color.Black.copy(alpha = 0.6f),
                     shape = RoundedCornerShape(4.dp)
                 )
-                .clickable(indication = ripple(radius = 14.dp),
+                .clickable(
+                    indication = ripple(radius = 14.dp),
                     interactionSource = remember { MutableInteractionSource() }) {
                     onRemove()
                 },

@@ -3,7 +3,7 @@ package com.newaura.bookish
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.navigator.Navigator
-import com.newaura.bookish.core.Context
+import com.newaura.bookish.core.ApplicationContext
 import com.newaura.bookish.core.SplashScreen
 import com.newaura.bookish.core.common.AppTheme
 import com.newaura.bookish.core.config.JwtConfig
@@ -20,8 +20,8 @@ import com.newaura.bookish.features.feed.UserRepository
 import com.newaura.bookish.features.feed.di.commonModule
 import com.newaura.bookish.features.feed.di.feedDataModule
 import com.newaura.bookish.features.home.di.homePresentationModule
+import com.newaura.bookish.features.bookdetail.di.bookDetailModule
 import com.newaura.bookish.features.post.di.createPostModule
-import com.newaura.bookish.features.post.di.imageUploadModule
 import com.newaura.bookish.features.post.domain.FilePicker
 import com.newaura.bookish.features.post.ui.FilePickerImpl
 import com.newaura.bookish.features.search.di.searchModule
@@ -39,7 +39,7 @@ fun App() {
     }
 }
 
-fun initKoin(context: Context, config: KoinAppDeclaration? = null) {
+fun initKoin(context: ApplicationContext, config: KoinAppDeclaration? = null) {
     startKoin {
         config?.invoke(this)
         val authServiceModule = module {
@@ -62,6 +62,7 @@ fun initKoin(context: Context, config: KoinAppDeclaration? = null) {
 
         modules(
             commonModule,
+            bookDetailModule,
             dataStoreModule,
             userDataStore,
             homePresentationModule,
@@ -69,7 +70,6 @@ fun initKoin(context: Context, config: KoinAppDeclaration? = null) {
             authDataModule,
             authDomainModule,
             authServiceModule,
-            imageUploadModule,
             createPostModule,
             searchModule,
             filePicker

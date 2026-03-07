@@ -31,6 +31,8 @@ import io.ktor.http.content.OutgoingContent
 import io.ktor.client.plugins.observer.ResponseObserver
 import com.newaura.bookish.core.util.AppLogger
 import com.newaura.bookish.features.search.data.model.SearchResultResponse
+import com.newaura.bookish.model.BookDetail
+import com.newaura.bookish.model.BookDetailResponse
 import io.ktor.client.request.HttpRequest
 
 class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
@@ -179,6 +181,19 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
                 parameter("searchTerm", query)
             }.body<ApiResponse<SearchResultResponse>>()
             AppLogger.d("Search Books Response: $response")
+            response
+        } catch (ex: Exception) {
+            AppLogger.e("Error searching books", ex)
+            null
+        }
+    }
+
+    override suspend fun fetchBookDetail(bookId: String): ApiResponse<BookDetailResponse>? {
+        return try {
+            val response = httpClient.get("$BASE_URL/api/bookish/book") {
+                parameter("id", bookId)
+            }.body<ApiResponse<BookDetailResponse>>()
+            AppLogger.d("Book detail response: $response")
             response
         } catch (ex: Exception) {
             AppLogger.e("Error searching books", ex)

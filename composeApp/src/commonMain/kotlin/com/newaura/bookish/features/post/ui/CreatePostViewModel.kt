@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.newaura.bookish.core.domain.UserDataStore
 import com.newaura.bookish.core.util.AppLogger
-import com.newaura.bookish.features.post.data.ImageUploadRepository
+import com.newaura.bookish.features.post.domain.ImageUploadRepository
 import com.newaura.bookish.features.post.data.dto.CreatePostRequest
 import com.newaura.bookish.features.post.data.dto.ImageFile
 import com.newaura.bookish.features.post.data.dto.PostData
@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 
 class CreatePostViewModel(
     private val createPostUseCase: CreatePostUseCase,
@@ -109,13 +110,11 @@ class CreatePostViewModel(
      * @param userId User ID for post creation
      */
     private fun uploadImagesInBackground(imageFiles: List<ImageFile>, userId: String) {
-        val imagePaths = imageFiles.map { it.path }
-        val workTag = "post_${System.currentTimeMillis()}"
-
-        AppLogger.d("🚀 Scheduling background upload for ${imagePaths.size} images")
+        val imageUris = imageFiles.map { it.contentUri }
+        val workTag = "post_${Clock.System.now()}"
 
         // Schedule the upload work
-        imageUploadRepository.scheduleBackgroundUpload(imagePaths, workTag)
+        imageUploadRepository.scheduleBackgroundUpload(imageUris, workTag)
 
         // Observe upload state
         viewModelScope.launch {

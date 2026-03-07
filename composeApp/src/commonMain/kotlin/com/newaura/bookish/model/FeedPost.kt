@@ -63,6 +63,7 @@ data class FeedPost(
     val postType: PostType = PostType.THOUGHT,
     val images: List<String>? = null,
     val bookName: String? = null,
+    val bookId: String? = null
 )
 
 @Serializable

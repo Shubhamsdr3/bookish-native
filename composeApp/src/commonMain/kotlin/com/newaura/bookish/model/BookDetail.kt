@@ -4,6 +4,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class BookDetailResponse(
+    val isSuccess: Boolean? = null,
+    val data: BookDetail? = null
+)
+
+
+@Serializable
 data class BookDetail(
     @SerialName("id")
     val id: String,
@@ -30,7 +37,11 @@ data class VolumeInfo(
     @SerialName("imageLinks")
     val imageLinks: ImageLinks? = null,
     @SerialName("language")
-    val language: String? = null
+    val language: String? = null,
+    @SerialName("averageRating")
+    val avgRating: Double? = null,
+    @SerialName("ratingCound")
+    val ratingCount: Double? = null,
 )
 
 @Serializable
@@ -39,5 +50,14 @@ data class ImageLinks(
     val smallThumbnail: String? = null,
     @SerialName("thumbnail")
     val thumbnail: String? = null
-)
+) {
+
+    fun getSecureThumbnail(): String? {
+        return thumbnail?.replace("http://", "https://")
+    }
+
+    fun getSecureSmallThumbnail(): String? {
+        return smallThumbnail?.replace("http://", "https://")
+    }
+}
 

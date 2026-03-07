@@ -1,8 +1,9 @@
 package com.newaura.bookish.core.ui
 
+import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import com.newaura.bookish.core.Context
+import com.newaura.bookish.core.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.InetSocketAddress
@@ -43,7 +44,7 @@ object WebViewUtil {
     }
 
     // ✅ Check network availability
-    fun isNetworkAvailable(context: Context): Boolean {
+    fun isNetworkAvailable(context: ApplicationContext): Boolean {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE)
                 as ConnectivityManager
         val network = cm.activeNetwork ?: return false
