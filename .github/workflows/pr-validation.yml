@@ -11,7 +11,7 @@ jobs:
       - name: Checkout PR branch (shallow clone)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1  # Only fetch current PR branch
+          fetch-depth: 0  # Only fetch current PR branch
 
       - name: Fetch base branch (only)
         run: |
@@ -31,8 +31,14 @@ jobs:
 
           echo ""
           echo "🔍 Validating commits added to ${{ github.event.pull_request.base.ref }}..."
+          
           ERROR=0
           COMMITS=$(git log origin/${{ github.event.pull_request.base.ref }}..HEAD --pretty=format:"%s")
+          
+          if [ -z "$COMMITS" ]; then
+            echo "⚠️ No commits found in range. Checking alternative approach..."
+            COMMITS=$(git log -1 --pretty=format:"%s")
+          fi
           
           while IFS= read -r COMMIT_MSG; do
             validate_message "commit message" "$COMMIT_MSG" || ERROR=1
