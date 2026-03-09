@@ -30,6 +30,7 @@ import kotlinx.serialization.json.Json
 import io.ktor.http.content.OutgoingContent
 import io.ktor.client.plugins.observer.ResponseObserver
 import com.newaura.bookish.core.util.AppLogger
+import com.newaura.bookish.features.profile.data.ProfileResponse
 import com.newaura.bookish.features.search.data.model.SearchResultResponse
 import com.newaura.bookish.model.BookDetail
 import com.newaura.bookish.model.BookDetailResponse
@@ -144,8 +145,18 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
         }.body()
     }
 
-    override suspend fun getCurrentUser(): ApiResponse<User?> {
-        return httpClient.get("$BASE_URL/user/me").body()
+    override suspend fun getUserProfile(userId: String): ApiResponse<ProfileResponse>? {
+        return try {
+            val response = httpClient.get(
+                "http://192.168.0.10:5500/reading_stats.json") {
+                parameter("userId", userId)
+            }.body<ApiResponse<ProfileResponse>>()
+            AppLogger.d("Search Books Response: $response")
+            response
+        } catch (ex: Exception) {
+            AppLogger.e("Error searching books", ex)
+            null
+        }
     }
 
     override suspend fun getUserById(userId: String): ApiResponse<User?> {

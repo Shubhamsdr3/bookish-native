@@ -2,6 +2,7 @@ package com.newaura.bookish.features.feed
 
 import com.newaura.bookish.core.network.ApiResponse
 import com.newaura.bookish.features.post.data.dto.CreatePostRequest
+import com.newaura.bookish.features.profile.data.ProfileResponse
 import com.newaura.bookish.features.search.data.model.SearchResultResponse
 import com.newaura.bookish.model.BookDetail
 import com.newaura.bookish.model.BookDetailResponse
@@ -17,7 +18,7 @@ interface BookishApiService {
     suspend fun likeFeed(feedId: String): Boolean
     suspend fun createPost(createPostRequest: CreatePostRequest): FeedResponse
     suspend fun searchFeeds(query: String): FeedResponse
-    suspend fun getCurrentUser(): ApiResponse<User?>
+    suspend fun getUserProfile(userId: String): ApiResponse<ProfileResponse>?
     suspend fun getUserById(userId: String): ApiResponse<User?>
     suspend fun updateProfile(user: User): ApiResponse<User?>
     suspend fun loginUser(user: User): Result<ApiResponse<UserResponseDto>>

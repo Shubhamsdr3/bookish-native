@@ -1,5 +1,7 @@
 package com.newaura.bookish.model
 
+import com.newaura.bookish.features.bookdetail.data.dto.BookReviews
+import com.newaura.bookish.features.bookdetail.data.dto.ReadingProgress
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -40,8 +42,10 @@ data class VolumeInfo(
     val language: String? = null,
     @SerialName("averageRating")
     val avgRating: Double? = null,
-    @SerialName("ratingCound")
-    val ratingCount: Double? = null,
+    @SerialName("ratingsCount")
+    val ratingCount: Int? = null,
+    val readingProgress: ReadingProgress? = null,
+    val reviews: List<BookReviews>? = null
 )
 
 @Serializable
@@ -49,15 +53,22 @@ data class ImageLinks(
     @SerialName("smallThumbnail")
     val smallThumbnail: String? = null,
     @SerialName("thumbnail")
-    val thumbnail: String? = null
+    val thumbnail: String? = null,
+    @SerialName("small")
+    val small: String? = null,
+    @SerialName("medium")
+    val medium: String? = null,
+    @SerialName("large")
+    val large: String? = null,
+    @SerialName("extraLarge")
+    val extraLarge: String? = null
 ) {
 
-    fun getSecureThumbnail(): String? {
-        return thumbnail?.replace("http://", "https://")
+    fun getSecureImageLarge(): String? {
+        return large?.replace("http://", "https://")
     }
 
-    fun getSecureSmallThumbnail(): String? {
-        return smallThumbnail?.replace("http://", "https://")
+    fun getSecureImageMedium(): String? {
+        return medium?.replace("http://", "https://")
     }
 }
-

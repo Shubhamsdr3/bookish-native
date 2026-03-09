@@ -41,6 +41,7 @@ import com.newaura.bookish.core.util.customImePadding
 import com.newaura.bookish.features.feed.ui.LoginUiState
 import com.newaura.bookish.features.feed.ui.LoginViewModel
 import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen
+import com.newaura.bookish.features.home.HomeScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 class OtpVerificationScreen(val phoneNumber: String) : Screen {
@@ -57,7 +58,7 @@ class OtpVerificationScreen(val phoneNumber: String) : Screen {
 
         LaunchedEffect(screenState.uiState) {
             if (screenState.uiState is LoginUiState.Success) {
-                navigator.push(HomeFeedScreen())
+                navigator.push(HomeScreen())
             }
         }
 
