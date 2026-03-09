@@ -24,6 +24,7 @@ import com.newaura.bookish.features.bookdetail.di.bookDetailModule
 import com.newaura.bookish.features.post.di.createPostModule
 import com.newaura.bookish.features.post.domain.FilePicker
 import com.newaura.bookish.features.post.ui.FilePickerImpl
+import com.newaura.bookish.features.profile.di.profileModule
 import com.newaura.bookish.features.search.di.searchModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
@@ -63,6 +64,7 @@ fun initKoin(context: ApplicationContext, config: KoinAppDeclaration? = null) {
         modules(
             commonModule,
             bookDetailModule,
+            profileModule,
             dataStoreModule,
             userDataStore,
             homePresentationModule,
@@ -76,7 +78,6 @@ fun initKoin(context: ApplicationContext, config: KoinAppDeclaration? = null) {
         )
     }
 
-    // Initialize JWT validator with backend public key
     initializeJwtValidator()
 }
 

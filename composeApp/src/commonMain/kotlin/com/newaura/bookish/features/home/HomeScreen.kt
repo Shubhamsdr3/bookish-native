@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen
-import com.newaura.bookish.features.bookdetail.ui.MyBookScreen
 import com.newaura.bookish.features.library.LibraryScreen
 import com.newaura.bookish.features.profile.ProfileScreen
 

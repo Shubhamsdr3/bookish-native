@@ -105,6 +105,8 @@ kotlin {
 
             //  Image Picker
             implementation(libs.imagepickerkmp)
+            // html text
+            implementation(libs.ksoup)
 
         }
         commonTest.dependencies {

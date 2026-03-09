@@ -217,7 +217,10 @@ private fun HomeFeedContent(
                             feedData = feed,
                             onClick = { onFeedClick(feed) },
                             onBookNameClick = { _ ->
-                                navigator.push(MyBookScreen(feed.post?.bookId ?: ""))
+                                val bookId = feed.post?.bookId ?: ""
+                                if(bookId.isNotEmpty()) {
+                                    navigator.push(MyBookScreen(bookId))
+                                }
                             }
                         )
                     }

@@ -27,7 +27,7 @@ class UserDataStoreImpl(
 
     override suspend fun fetchUser() {
         try {
-            val userData = userRepository.getCurrentUser()
+            val userData = userRepository.getUserById("")
 //            _user.value = userData
         } catch (e: Exception) {
             // Handle error as needed

@@ -3,7 +3,7 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
-        <domain includeSubdomains="true">192.168.0.7</domain>
+        <domain includeSubdomains="true">192.168.0.10</domain>
     </domain-config>
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">books.google.com</domain>
