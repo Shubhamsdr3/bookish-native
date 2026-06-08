@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import com.newaura.bookish.features.feed.ui.screens.HomeFeedScreen
-import com.newaura.bookish.features.library.LibraryScreen
+import com.newaura.bookish.features.library.ui.LibraryScreen
 import com.newaura.bookish.features.profile.ProfileScreen
 
 @OptIn(ExperimentalMaterial3Api::class)

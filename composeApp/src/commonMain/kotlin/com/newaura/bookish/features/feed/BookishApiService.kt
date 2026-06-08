@@ -1,6 +1,7 @@
 package com.newaura.bookish.features.feed
 
 import com.newaura.bookish.core.network.ApiResponse
+import com.newaura.bookish.features.library.data.LibraryBook
 import com.newaura.bookish.features.post.data.dto.CreatePostRequest
 import com.newaura.bookish.features.profile.data.ProfileResponse
 import com.newaura.bookish.features.search.data.model.SearchResultResponse
@@ -27,4 +28,6 @@ interface BookishApiService {
     suspend fun searchBook(query: String): ApiResponse<SearchResultResponse>?
 
     suspend fun fetchBookDetail(bookId: String): ApiResponse<BookDetailResponse>?
+
+    suspend fun fetchLibraryBooks(userId: String): ApiResponse<List<LibraryBook>>?
 }

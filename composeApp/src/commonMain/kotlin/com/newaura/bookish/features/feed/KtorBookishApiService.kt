@@ -30,6 +30,7 @@ import kotlinx.serialization.json.Json
 import io.ktor.http.content.OutgoingContent
 import io.ktor.client.plugins.observer.ResponseObserver
 import com.newaura.bookish.core.util.AppLogger
+import com.newaura.bookish.features.library.data.LibraryBook
 import com.newaura.bookish.features.profile.data.ProfileResponse
 import com.newaura.bookish.features.search.data.model.SearchResultResponse
 import com.newaura.bookish.model.BookDetail
@@ -147,6 +148,7 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
 
     override suspend fun getUserProfile(userId: String): ApiResponse<ProfileResponse>? {
         return try {
+            //TODO remove this localurl
             val response = httpClient.get(
                 "http://192.168.0.10:5500/reading_stats.json") {
                 parameter("userId", userId)
@@ -205,6 +207,21 @@ class KtorBookishApiService(initialAuthToken: String = "") : BookishApiService {
                 parameter("id", bookId)
             }.body<ApiResponse<BookDetailResponse>>()
             AppLogger.d("Book detail response: $response")
+            response
+        } catch (ex: Exception) {
+            AppLogger.e("Error searching books", ex)
+            null
+        }
+    }
+
+    override suspend fun fetchLibraryBooks(userId: String): ApiResponse<List<LibraryBook>>? {
+        return try {
+            //TODO remove this localurl
+            val response = httpClient.get(
+                "http://192.168.0.10:5500/my_library_response.json") {
+                parameter("userId", userId)
+            }.body<ApiResponse<List<LibraryBook>>>()
+            AppLogger.d("Search Books Response: $response")
             response
         } catch (ex: Exception) {
             AppLogger.e("Error searching books", ex)

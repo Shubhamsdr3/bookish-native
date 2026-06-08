@@ -3,6 +3,7 @@ package com.newaura.bookish.features.bookdetail.data
 import com.newaura.bookish.core.util.AppLogger
 import com.newaura.bookish.features.feed.BookishApiService
 import com.newaura.bookish.features.bookdetail.domain.BookRepository
+import com.newaura.bookish.features.library.data.LibraryBook
 import com.newaura.bookish.model.BookDetail
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -17,6 +18,23 @@ class BookRepositoryImpl(private val apiService: BookishApiService) : BookReposi
             if (response != null && response.isSuccess) {
                 val bookDetail = response.data?.data
                 emit(Result.success(bookDetail!!))
+            } else {
+                emit(Result.failure(Exception(response?.errorMessage ?: "Unknown error occurred")))
+            }
+        } catch (e: Exception) {
+            AppLogger.e("Error fetching book detail: ${e.message}", e)
+            emit(Result.failure(e))
+        }
+    }
+
+    override suspend fun fetchLibraryBooks(userId: String): Flow<Result<List<LibraryBook>>> = flow {
+        try {
+            val response = apiService.fetchLibraryBooks(userId)
+            AppLogger.d("Fetched library book response: $response")
+
+            if (response != null && response.isSuccess) {
+                val books = response.data!!
+                emit(Result.success(books))
             } else {
                 emit(Result.failure(Exception(response?.errorMessage ?: "Unknown error occurred")))
             }
