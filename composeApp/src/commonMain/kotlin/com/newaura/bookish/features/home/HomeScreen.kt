@@ -55,19 +55,19 @@ class HomeScreen : Screen {
                 tonalElevation = 4.dp
             ) {
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, "Home") },
+                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
                     label = { Text("Home") },
                     selected = selectedItem.value == 0,
                     onClick = { selectedItem.value = 0 }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.LibraryBooks, "My Books") },
+                    icon = { Icon(Icons.Default.LibraryBooks, contentDescription = null) },
                     label = { Text("My Books") },
                     selected = selectedItem.value == 1,
                     onClick = { selectedItem.value = 1 }
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Person, "Profile") },
+                    icon = { Icon(Icons.Default.Person, contentDescription = null) },
                     label = { Text("Profile") },
                     selected = selectedItem.value == 2,
                     onClick = { selectedItem.value = 2 }
